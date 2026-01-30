@@ -1,0 +1,340 @@
+import React, { useEffect, useState } from "react";
+import PageHeader from "../../components/layout/PageHeader";
+import { useQueryParams } from "../../hooks/useQueryParams";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDealerById } from "../../redux/slices/dealerSlice";
+import {
+  Barcode,
+  ExternalLink,
+  Eye,
+  Mail,
+  MapPin,
+  Package,
+  Phone,
+  Store,
+  Trash2,
+  User,
+} from "lucide-react";
+import { formatDate } from "../../utils/dateFormatter";
+import SmartTable from "../../components/layout/SmartTable";
+import { useNavigate } from "react-router-dom";
+import AssetStatusBadge from "../assets/AssetStatusBadge";
+import AssetDeleteModal from "../../partial/asset/AssetDeleteModal";
+import { deleteAsset } from "../../redux/slices/assetSlice";
+import { handleResponse } from "../../utils/helpers/helpers";
+import NoDataFound from "../../components/NoDataFound";
+import DealerDetailsSkeleton from "./DealerDetailsSkeleton";
+
+const DealerDetailsPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { dealerId } = useQueryParams();
+
+  const { isDeletingAsset } = useSelector((state) => state.asset);
+  const { delearDetails, isFetchingDealerDetails } = useSelector((state) => state.dealer);
+  const { dealer, assets, assetCount } = delearDetails || {};
+
+  const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState(null);
+
+  const fetchDealerDetails = () => {
+    dispatch(fetchDealerById(dealerId));
+  };
+  useEffect(() => {
+    if (dealerId) {
+      fetchDealerDetails();
+    }
+  }, [dealerId]);
+
+  const assetColumns = [
+    {
+      label: "Asset",
+      key: "asset",
+      render: (asset) => (
+        <div className="flex items-center gap-3">
+          {/* Icon */}
+          <div className="grid h-10 w-10 place-items-center rounded-md border border-slate-200 bg-white">
+            <Package className="h-5 w-5 text-slate-700" />
+          </div>
+
+          {/* Asset info */}
+          <div>
+            <div className="text-sm font-semibold text-slate-900">
+              {asset?.assetNo}
+            </div>
+
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-xs font-medium text-slate-500">
+                Fixture · {asset?.fixtureNo}
+              </span>
+              <span className="text-slate-400 text-xs">•</span>
+              <span className="text-xs font-medium text-slate-500">
+                {asset?.brand}
+              </span>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+
+    {
+      label: "Stand / Type",
+      key: "standType",
+      render: (asset) => (
+        <span className="text-sm font-medium text-slate-700">
+          {asset?.standType}
+        </span>
+      ),
+    },
+
+    {
+      label: "Location",
+      key: "location",
+      render: (asset) => (
+        <div className="flex items-start gap-2 max-w-[220px]">
+          <MapPin className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+          <span className="text-xs text-slate-600 line-clamp-2">
+            {asset?.location?.address}
+          </span>
+        </div>
+      ),
+    },
+
+    {
+      label: "Installed On",
+      key: "installationDate",
+      render: (asset) => (
+        <span className="text-sm font-medium text-slate-700">
+          {formatDate(asset?.installationDate, "long")}
+        </span>
+      ),
+    },
+
+    {
+      label: "Barcode",
+      key: "barcode",
+      render: (asset) => (
+        <div className="flex items-center gap-2">
+          <Barcode className="h-4 w-4 text-slate-500" />
+
+          {asset?.barcodeImageUrl ? (
+            <a
+              href={asset.barcodeImageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-medium text-blue-600 hover:underline"
+            >
+              View
+            </a>
+          ) : (
+            <span className="text-xs text-slate-400">N/A</span>
+          )}
+        </div>
+      ),
+    },
+
+    {
+      label: "Status",
+      key: "status",
+      render: (asset) => <AssetStatusBadge status={asset?.status} />,
+    },
+  ];
+
+  const rowActions = [
+    {
+      label: "View",
+      onClick: (asset) => navigate(`/assets/asset?assetId=${asset?._id}`),
+      icon: Eye,
+    },
+    {
+      label: "Delete Asset",
+      onClick: (asset) => {
+        (setSelectedAsset(asset), setShowDeleteOverlay(true));
+      },
+      type: "danger",
+      icon: Trash2,
+    },
+  ];
+
+  const clearStates = () => {
+    setShowDeleteOverlay(false);
+    setSelectedAsset(null);
+  };
+
+  const handleDeleteAsset = async (id) => {
+    await handleResponse(dispatch(deleteAsset(id)), () => {
+      fetchDealerDetails();
+      clearStates();
+    });
+  };
+
+  if(isFetchingDealerDetails){
+    return <DealerDetailsSkeleton />
+  }
+  if (!isFetchingDealerDetails && !delearDetails) {
+    return (
+      <NoDataFound
+        title="Dealer Not Found"
+        description="The dealer you’re looking for doesn’t exist or may have been removed. Please check the link or return to the dealers list."
+        className="h-[80dvh]"
+        icon={Store}
+      />
+    );
+  }
+
+  return (
+    <>
+      <div className="space-y-6">
+        <PageHeader
+          title="Dealer Details"
+          description="View and manage dealer information, contact details, and associated assets."
+          showBackButton
+        />
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Personal Information */}
+          <div className="lg:col-span-1 bg-white rounded-xl border border-gray-200 shadow-sm  hover:shadow-md transition-shadow">
+            <h3 className="text-lg font-semibold text-gray-900  flex items-center gap-2 border-b border-slate-200 p-5">
+              <User className="h-5 w-5 text-blue-600" />
+              Personal Information
+            </h3>
+            <div className="p-5 space-y-4">
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Full Name
+                </p>
+                <p className="text-base font-semibold text-gray-900">
+                  {dealer?.name || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Shop Name
+                </p>
+                <p className="text-base font-semibold text-gray-900">
+                  {dealer?.shopName || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Dealer Code
+                </p>
+                <p className="text-sm font-mono bg-gray-50 p-2 rounded border border-gray-200 text-gray-900 break-all">
+                  {dealer?.dealerCode || "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+          {/* Contact & Location */}
+          <div className="lg:col-span-1 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="text-lg font-semibold text-gray-900  flex items-center gap-2 border-b border-slate-200 p-5">
+              <Phone className="h-5 w-5 text-blue-600" />
+              Contact & Location
+            </h3>
+            <div className="p-5 space-y-4">
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Phone
+                </p>
+                <a
+                  href={`tel:${dealer?.phone}`}
+                  className="text-base font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-2"
+                >
+                  <Phone className="h-4 w-4" />
+                  {dealer?.phone || "N/A"}
+                </a>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Email
+                </p>
+                <a
+                  href={`mailto:${dealer?.email}`}
+                  className="text-base font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-2"
+                >
+                  <Mail className="h-4 w-4" />
+                  {dealer?.email || "N/A"}
+                </a>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Address
+                </p>
+                <p className="text-xs text-gray-900 leading-relaxed">
+                  {dealer?.location?.address || "N/A"}
+                </p>
+                {dealer?.location?.googleMapLink && (
+                  <a
+                    href={dealer?.location.googleMapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 mt-2"
+                  >
+                    View on Map
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+          {/* Business Information */}
+          <div className="lg:col-span-1 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+            <h3 className="text-lg font-semibold text-gray-900  flex items-center gap-2 border-b border-slate-200 p-5">
+              <Store className="h-5 w-5 text-blue-600" />
+              Business Information
+            </h3>
+            <div className="p-5 space-y-4">
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  VAT Registration
+                </p>
+                <p className="text-base font-mono bg-gray-50 p-2 rounded border border-gray-200 text-gray-900">
+                  {dealer?.vatRegistration || "N/A"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Status
+                </p>
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${dealer?.isActive ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}
+                >
+                  {dealer?.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  User ID
+                </p>
+                <p className="text-xs font-mono text-gray-600 bg-gray-50 p-2 rounded border border-gray-200 break-all">
+                  {dealer?.userId || "N/A"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <SmartTable
+          title="Dealer Assets"
+          totalcount={assetCount ?? 0}
+          data={assets || []}
+          columns={assetColumns}
+          actions={rowActions}
+          emptyMessage="No assets found"
+          emptyDescription="This dealer does not have any assets assigned yet. Once assets are allocated, they will appear here with their details and status."
+          loading={isFetchingDealerDetails}
+        />
+      </div>
+
+      <AssetDeleteModal
+        isOpen={showDeleteOverlay}
+        onClose={clearStates}
+        asset={selectedAsset}
+        onSubmit={handleDeleteAsset}
+        loading={isDeletingAsset}
+      />
+    </>
+  );
+};
+
+export default DealerDetailsPage;

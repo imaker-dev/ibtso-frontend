@@ -1,0 +1,111 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import "tailwindcss";
+@import "./additional-styles/utility-patterns.css";
+/* @import './additional-styles/flatpickr.css'; */
+
+body {
+  font-family: "Poppins", sans-serif;
+}
+
+button {
+  cursor: pointer;
+}
+
+@theme {
+  --container-8xl: 88rem;
+  --container-9xl: 96rem;
+  --container-10xl: 120rem;
+
+  /* =========================
+   Primary – Neutral Dark
+========================== */
+  --color-primary-50: #f8fafc;
+  --color-primary-100: #e5e7eb;
+  --color-primary-200: #cbd5e1;
+  --color-primary-300: #94a3b8;
+  --color-primary-400: #64748b;
+
+  /* CORE DARK */
+  --color-primary-500: #0f172a; /* main background */
+  --color-primary-600: #0b1220;
+  --color-primary-700: #090f1a;
+  --color-primary-800: #070c14;
+  --color-primary-900: #05080f;
+
+  /* =========================
+   Secondary – Action Blue
+========================== */
+  --color-secondary-50: #eff6ff;
+  --color-secondary-100: #dbeafe;
+  --color-secondary-200: #bfdbfe;
+  --color-secondary-300: #93c5fd;
+  --color-secondary-400: #60a5fa;
+
+  /* MAIN ACTION */
+  --color-secondary-500: #3b82f6; /* buttons, links */
+  --color-secondary-600: #2563eb;
+  --color-secondary-700: #1d4ed8;
+  --color-secondary-800: #1e40af;
+  --color-secondary-900: #1e3a8a;
+
+  /* =========================
+   Tertiary – Elevated Surfaces
+========================== */
+  --color-tertiary-50: #ffffff;
+  --color-tertiary-100: #f9fafb;
+  --color-tertiary-200: #e5e7eb;
+  --color-tertiary-300: #d1d5db;
+  --color-tertiary-400: #9ca3af;
+
+  /* SURFACE DARK */
+  --color-tertiary-500: #111827; /* cards */
+  --color-tertiary-600: #1f2937;
+  --color-tertiary-700: #273449;
+  --color-tertiary-800: #374151;
+  --color-tertiary-900: #4b5563;
+
+  /* Status Colors */
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-200: #bbf7d0;
+  --color-success-300: #86efac;
+  --color-success-400: #4ade80;
+  --color-success-500: #22c55e; /* main */
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+  --color-success-800: #166534;
+  --color-success-900: #14532d;
+
+  --color-danger-50: #fdf2f2;
+  --color-danger-100: #fddada;
+  --color-danger-200: #f9a8a8;
+  --color-danger-300: #f47373;
+  --color-danger-400: #ef5350;
+  --color-danger-500: #e53935; /* main */
+  --color-danger-600: #c62828;
+  --color-danger-700: #ad1f1f;
+  --color-danger-800: #7f1616;
+  --color-danger-900: #4c0c0c;
+
+  --color-warning-50: #fff8e1;
+  --color-warning-100: #ffecb3;
+  --color-warning-200: #ffe082;
+  --color-warning-300: #ffd54f;
+  --color-warning-400: #ffca28;
+  --color-warning-500: #ffb300; /* main */
+  --color-warning-600: #ffa000;
+  --color-warning-700: #ff8f00;
+  --color-warning-800: #ff6f00;
+  --color-warning-900: #e65100;
+
+  --color-info-50: #e6f7fe;
+  --color-info-100: #bdeafd;
+  --color-info-200: #85dbfc;
+  --color-info-300: #4ac9fb;
+  --color-info-400: #1eb5f7;
+  --color-info-500: #43c2fc; /* main */
+  --color-info-600: #0c9fe0;
+  --color-info-700: #087fb3;
+  --color-info-800: #05597f;
+  --color-info-900: #03354d;
+}
