@@ -1,119 +1,158 @@
+import { TrendingUp } from "lucide-react";
 import {
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
+
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
-  LineChart,
-  Line,
+  LabelList,
 } from "recharts";
 
 export default function AnalyticsCharts({ data }) {
-  const brandColors = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+  const { assetsByBrand, assetsByDealer, assetsCreatedPerMonth } = data || {};
 
-  const monthlyData = data?.analytics?.assetsCreatedPerMonth?.map((item) => ({
-    month: `${item._id.month}/2026`,
-    assets: item.count,
+  const dealerBarData = (assetsByDealer || [])?.map((d) => ({
+    dealer: d?.shopName,
+    assets: d?.assetCount,
+  }));
+
+  const brandBarData = (assetsByBrand || [])?.map((b) => ({
+    brand: b?._id,
+    assets: b?.count,
   }));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      {/* Assets by Brand - Bar Chart */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 border-b border-slate-200 p-5">
-          Assets by Brand
-        </h2>
-        <div className="p-5">
-          <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data?.analytics?.assetsByBrand}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="_id" stroke="#6b7280" />
-            <YAxis stroke="#6b7280" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid #e5e7eb",
-                borderRadius: "0.5rem",
-              }}
-            />
-            <Bar dataKey="count" fill="#3b82f6" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">
+              Assets by Dealer
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Distribution by shop
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Assets by Dealer - Pie Chart */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 border-b border-slate-200 p-5">
-          Assets Distribution by Dealer
-        </h2>
-        <div className="p-5">
-          <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={data?.analytics?.assetsByDealer}
-              dataKey="assetCount"
-              nameKey="shopName"
-              cx="50%"
-              cy="50%"
-              outerRadius={100}
-              label
+        {/* Chart */}
+        <div className="h-[320px] w-full px-4 pb-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={dealerBarData}
+              margin={{ top: 24, right: 16, left: 0, bottom: 0 }}
             >
-              {data?.analytics?.assetsByDealer?.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={brandColors[index % brandColors.length]}
-                />
-              ))}
-            </Pie>
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid #e5e7eb",
-                borderRadius: "0.5rem",
-              }}
-            />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
+              <CartesianGrid
+                vertical={false}
+                stroke="#e5e7eb"
+                strokeDasharray="3 3"
+              />
+
+              <XAxis
+                dataKey="dealer"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: "#64748b", fontSize: 12 }}
+              />
+
+              <YAxis
+                allowDecimals={false}
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: "#64748b", fontSize: 12 }}
+              />
+
+              <Tooltip
+                cursor={{ fill: "rgba(59,130,246,0.08)" }}
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  borderRadius: "0.5rem",
+                  border: "1px solid #e5e7eb",
+                  fontSize: "12px",
+                }}
+                formatter={(value) => [`${value} Assets`, "Assets"]}
+              />
+
+              <Bar
+                dataKey="assets"
+                fill="#3b82f6"
+                radius={[8, 8, 0, 0]}
+                barSize={40}
+              >
+                <LabelList position="top" fontSize={11} fill="#374151" />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Monthly Trend - Line Chart */}
-      {/* <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 mb-6">
-          Assets Created Over Time
-        </h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={monthlyData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="month" stroke="#6b7280" />
-            <YAxis stroke="#6b7280" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid #e5e7eb",
-                borderRadius: "0.5rem",
-              }}
-            />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="assets"
-              stroke="#3b82f6"
-              strokeWidth={2}
-              dot={{ fill: "#3b82f6", r: 6 }}
-              activeDot={{ r: 8 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div> */}
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">
+              Assets by Brand
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Brand-wise asset distribution
+            </p>
+          </div>
+        </div>
+
+        {/* Chart */}
+        <div className="h-[320px] w-full px-4 pb-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={brandBarData}
+              margin={{ top: 24, right: 16, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid
+                vertical={false}
+                stroke="#e5e7eb"
+                strokeDasharray="3 3"
+              />
+
+              <XAxis
+                dataKey="brand"
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: "#64748b", fontSize: 12 }}
+              />
+
+              <YAxis
+                allowDecimals={false}
+                tickLine={false}
+                axisLine={false}
+                tick={{ fill: "#64748b", fontSize: 12 }}
+              />
+
+              <Tooltip
+                cursor={{ fill: "rgba(59,130,246,0.08)" }}
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  borderRadius: "0.5rem",
+                  border: "1px solid #e5e7eb",
+                  fontSize: "12px",
+                }}
+                formatter={(value) => [`${value} Assets`, "Assets"]}
+              />
+
+              <Bar
+                dataKey="assets"
+                fill="#6366f1"
+                radius={[8, 8, 0, 0]}
+                barSize={48}
+              >
+                <LabelList position="top" fontSize={11} fill="#374151" />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,144 +1,181 @@
-import { Package, Store, ArrowRight, ChevronRight } from "lucide-react";
+import { Package, Store, ArrowRight } from "lucide-react";
 import { formatDate } from "../../utils/dateFormatter";
-import NoDataFound from "../../components/NoDataFound";
-import { Link } from "react-router-dom";
-import DealerStatusBadge from "../../pages/dealers/DealerStatusBadge";
 import AssetStatusBadge from "../../pages/assets/AssetStatusBadge";
+import DealerStatusBadge from "../../pages/dealers/DealerStatusBadge";
+import { Link } from "react-router-dom";
 
-/* ================= Asset Card ================= */
-function AssetCard({ asset }) {
+// Asset Card Component
+const AssetCard = ({ asset }) => {
   return (
     <Link
       to={`/assets/asset?assetId=${asset?._id}`}
-      className="group flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 transition hover:bg-gray-50 hover:border-blue-300 active:scale-[0.99] cursor-pointer"
+      className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-blue-300 hover:shadow-md cursor-pointer"
     >
-      {/* Left */}
-      <div className="flex-1 min-w-0">
-        {/* Row 1 */}
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-gray-900 truncate">
-            {asset?.assetNo}
-          </p>
-
+      <div className="relative z-10 space-y-3">
+        {/* Header with Asset No and Status */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-900 truncate">
+              {asset?.assetNo}
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Fixture: {asset?.fixtureNo}
+            </p>
+          </div>
           <AssetStatusBadge status={asset?.status} />
         </div>
 
-        {/* Row 2 */}
-        <div className="flex items-center justify-between gap-2 text-xs text-gray-500 mt-1">
-          {asset?.brand} • {asset?.dealerId?.shopName} •{" "}
-          {formatDate(asset?.createdAt)}
+        {/* Brand and Dealer Info */}
+        <div className="space-y-2 pt-1">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-blue-500" />
+            <p className="text-sm text-gray-700 font-medium">{asset?.brand}</p>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-gray-600">
+            <Store className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+            <span className="truncate">{asset?.dealerId?.shopName}</span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+          <span className="text-xs text-gray-500">
+            {formatDate(asset?.createdAt, "long")}
+          </span>
+          <ArrowRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500 transition-colors" />
         </div>
       </div>
-
-      {/* Chevron */}
-      <ChevronRight className="h-5 w-5 text-gray-400 ml-3 shrink-0 transition-transform group-hover:translate-x-0.5" />
     </Link>
   );
-}
+};
 
-/* ================= Dealer Card ================= */
-function DealerCard({ dealer }) {
+// Dealer Card Component
+const DealerCard = ({ dealer }) => {
   return (
     <Link
       to={`/dealers/dealer?dealerId=${dealer?._id}`}
-      className="group flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 transition hover:bg-gray-50 hover:border-purple-300 active:scale-[0.99] cursor-pointer"
+      className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-purple-300 hover:shadow-md cursor-pointer"
     >
-      {/* Left */}
-      <div className="flex-1 min-w-0">
-        {/* Row 1 */}
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-gray-900 truncate">
-            {dealer?.name}
-          </p>
+      <div className="relative z-10 space-y-3">
+        {/* Header with Dealer Name and Status */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-900 truncate">
+              {dealer?.name}
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Code: {dealer?.dealerCode}
+            </p>
+          </div>
           <DealerStatusBadge status={dealer?.isActive} />
         </div>
 
-        {/* Row 2 */}
-        <div className="flex items-center justify-between gap-2 text-xs text-gray-500 mt-1">
-          {dealer?.shopName} • {dealer?.dealerCode}
+        {/* Shop and Email Info */}
+        <div className="space-y-2 pt-1">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-purple-500" />
+            <p className="text-sm text-gray-700 font-medium truncate">
+              {dealer?.shopName}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-gray-600 truncate">
+            <Package className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+            <span className="truncate">{dealer?.email}</span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+          <span className="text-xs text-gray-500">
+            {formatDate(dealer?.createdAt, "long")}
+          </span>
+          <ArrowRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-purple-500 transition-colors" />
         </div>
       </div>
-
-      {/* Chevron */}
-      <ChevronRight className="h-5 w-5 text-gray-400 ml-3 shrink-0 transition-transform group-hover:translate-x-0.5" />
     </Link>
   );
-}
+};
 
-/* ================= Main Component ================= */
-export default function RecentActivity({ data }) {
-  const { assets = [], dealers = [] } = data || {};
-
+// Main Component
+export default function RecentActivity({ assets,dealers }) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* ================= Recent Assets ================= */}
-      <div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between p-5 border-b border-slate-200">
-            <div className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-blue-600" />
+    <div className="space-y-8">
+      {/* ================= Recent Assets Section ================= */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-blue-50 border border-blue-200">
+              <Package className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
               <h2 className="text-lg font-semibold text-gray-900">
                 Recent Assets
               </h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Latest inventory additions
+              </p>
             </div>
-
-            <Link
-              to={"/assets"}
-              className="text-sm font-medium text-blue-600 hover:underline flex items-center gap-1"
-            >
-              View all
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
-
-          <div className="p-5 space-y-4">
-            {assets.length === 0 ? (
-              <NoDataFound
-                icon={Package}
-                title="No assets yet"
-                description="Assets will appear here once added."
-              />
-            ) : (
-              assets.map((asset) => <AssetCard key={asset._id} asset={asset} />)
-            )}
+          <div className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors cursor-pointer flex items-center gap-1">
+            View All
+            <ArrowRight className="w-4 h-4" />
           </div>
         </div>
+
+        {assets?.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center">
+            <Package className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <p className="text-gray-700 font-medium">No assets yet</p>
+            <p className="text-gray-600 text-sm mt-1">
+              Assets will appear here once added to the system
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {assets?.slice(0, 3)?.map((asset) => (
+              <AssetCard key={asset?._id} asset={asset} />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* ================= Recent Dealers ================= */}
-      <div>
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between p-5 border-b border-slate-200">
-            <div className="flex items-center gap-2">
-              <Store className="h-5 w-5 text-purple-600" />
+      {/* ================= Recent Dealers Section ================= */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-purple-50 border border-purple-200">
+              <Store className="w-5 h-5 text-purple-600" />
+            </div>
+            <div>
               <h2 className="text-lg font-semibold text-gray-900">
                 Recent Dealers
               </h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Latest dealer registrations
+              </p>
             </div>
-
-            <Link
-              to={"/dealers"}
-              className="text-sm font-medium text-purple-600 hover:underline flex items-center gap-1"
-            >
-              View all
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
-
-          <div className="p-5 space-y-4">
-            {dealers.length === 0 ? (
-              <NoDataFound
-                icon={Store}
-                title="No dealers yet"
-                description="Dealers will appear here once created."
-              />
-            ) : (
-              dealers.map((dealer) => (
-                <DealerCard key={dealer._id} dealer={dealer} />
-              ))
-            )}
+          <div className="text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors cursor-pointer flex items-center gap-1">
+            View All
+            <ArrowRight className="w-4 h-4" />
           </div>
         </div>
+
+        {dealers?.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center">
+            <Store className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <p className="text-gray-700 font-medium">No dealers yet</p>
+            <p className="text-gray-600 text-sm mt-1">
+              Dealers will appear here once registered in the system
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {dealers?.slice(0, 3).map((dealer) => (
+              <DealerCard key={dealer?._id} dealer={dealer} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

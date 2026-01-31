@@ -10,8 +10,8 @@ import DashboardSkeleton from "../partial/dashboard/DashboardSkeleton";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const { dashordStats,loading } = useSelector((state) => state.dashboard);
-  const { assets, dealers,recent } = dashordStats || {};
+  const { dashordStats, loading } = useSelector((state) => state.dashboard);
+  const { assets, dealers, analytics, recent } = dashordStats || {};
 
   useEffect(() => {
     dispatch(fetchDashbordStats());
@@ -44,9 +44,10 @@ const Dashboard = () => {
     },
   ];
 
-  if(loading){
-    return <DashboardSkeleton />
+  if (loading) {
+    return <DashboardSkeleton />;
   }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -68,9 +69,9 @@ const Dashboard = () => {
       </div>
 
       {/* Analytics Charts */}
-      <AnalyticsCharts data={dashordStats} />
+      <AnalyticsCharts data={analytics} />
 
-      <RecentActivity data={recent} />
+      <RecentActivity assets={recent?.assets} dealers={recent?.dealers} />
     </div>
   );
 };
