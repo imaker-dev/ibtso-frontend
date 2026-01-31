@@ -7,130 +7,193 @@ import {
   Trash2,
   ExternalLink,
   Barcode,
+  Download,
+  Zap,
+  Calendar,
+  Loader2,
 } from "lucide-react";
+import { formatDate } from "../../utils/dateFormatter";
 import AssetStatusBadge from "./AssetStatusBadge";
 
-const AssetCard = ({ asset, onView, onEdit, onDelete }) => {
-  const { dealerId, location } = asset || {};
+// Action Button Component
+const ActionButton = ({
+  icon: Icon,
+  label,
+  onClick,
+  variant = "default",
+  disabled = false,
+  loading = false,
+}) => {
+  const baseStyles =
+    "inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200";
+  const variants = {
+    default:
+      "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300",
+    danger:
+      "bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 hover:border-red-300",
+    primary:
+      "bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100 hover:border-blue-300",
+  };
 
   return (
-    <div className="group rounded-2xl bg-white border border-slate-200
-                    transition-all duration-300 hover:shadow-lg hover:border-slate-300">
-      
-      {/* ================= Header ================= */}
-      <div className="flex items-center justify-between p-5">
-        <div className="flex items-center gap-4">
-          <div className="grid h-12 w-12 place-items-center rounded-xl
-                          bg-slate-100 text-slate-700">
-            <Package className="h-5 w-5" />
+    <button
+      onClick={onClick}
+      disabled={disabled || loading}
+      className={`${baseStyles} ${variants[variant]} ${
+        disabled || loading ? "opacity-50 cursor-not-allowed" : ""
+      }`}
+    >
+      {loading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Icon className="h-4 w-4" />
+      )}
+
+      {label && <span>{label}</span>}
+    </button>
+  );
+};
+
+const AssetCard = ({
+  asset,
+  onView = () => {},
+  onEdit = () => {},
+  onDelete = () => {},
+  onDownload = () => {},
+  downloading = false,
+}) => {
+  const { dealerId, location, dimension } = asset;
+
+  return (
+    <div className="group rounded-xl bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:border-secondary-300 hover:shadow">
+      {/* Header Section */}
+      <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-secondary-50/50 to-transparent">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4 flex-1">
+            {/* Icon */}
+            <div className="w-12 h-12 rounded-lg bg-secondary-100 border border-secondary-200 flex items-center justify-center flex-shrink-0">
+              <Package className="w-6 h-6 text-secondary-600" />
+            </div>
+
+            {/* Asset Info */}
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base font-bold text-gray-900 truncate">
+                {asset.assetNo}
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Fixture:{" "}
+                <span className="font-semibold text-gray-700">
+                  {asset.fixtureNo}
+                </span>
+              </p>
+            </div>
           </div>
 
-          <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-slate-900 truncate">
-              {asset?.assetNo}
-            </h3>
-            <p className="text-xs text-slate-500">
-              Fixture · {asset?.fixtureNo}
-            </p>
-          </div>
+          {/* Status Badge */}
+          <AssetStatusBadge status={asset.status} />
         </div>
-
-        <AssetStatusBadge status={asset?.status} />
       </div>
 
-      {/* ================= Body ================= */}
-      <div className="px-5 pb-5 space-y-3 text-xs text-slate-600">
-        
-        {/* Dealer */}
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-slate-900">
-            {dealerId?.name || "—"}
-          </span>
-          <span className="text-slate-300">•</span>
-          <span className="truncate">
-            {dealerId?.shopName || "—"}
-          </span>
-        </div>
-
-        {/* Location */}
-        <div className="flex items-start gap-2">
-          <MapPin className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
-
-          <div className="flex flex-col gap-1">
-            <span className="line-clamp-2">
-              {location?.address || "N/A"}
+      {/* Content Section */}
+      <div className="px-6 py-4 space-y-4">
+        {/* Brand & Dealer */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-gray-500">Brand</span>
+            <span className="text-sm font-semibold text-gray-900">
+              {asset.brand}
             </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-gray-500">Dealer</span>
+            <div className="text-right">
+              <p className="text-sm font-semibold text-gray-900">
+                {dealerId?.name}
+              </p>
+              {/* <p className="text-xs text-gray-500">{dealerId?.shopName}</p> */}
+            </div>
+          </div>
+        </div>
 
-            {location?.googleMapLink && (
+        {/* Dimensions */}
+        {dimension && (
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-100 text-center">
+              <p className="text-xs text-gray-500">Length</p>
+              <p className="text-sm font-bold text-gray-900">
+                {dimension.length}
+                <span className="text-xs text-gray-500 ml-1">
+                  {dimension.unit}
+                </span>
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-100 text-center">
+              <p className="text-xs text-gray-500">Height</p>
+              <p className="text-sm font-bold text-gray-900">
+                {dimension.height}
+                <span className="text-xs text-gray-500 ml-1">
+                  {dimension.unit}
+                </span>
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-2.5 border border-gray-100 text-center">
+              <p className="text-xs text-gray-500">Depth</p>
+              <p className="text-sm font-bold text-gray-900">
+                {dimension.depth}
+                <span className="text-xs text-gray-500 ml-1">
+                  {dimension.unit}
+                </span>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Barcode Section */}
+        {asset.barcodeImageUrl && (
+          <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Barcode className="w-4 h-4 text-gray-400" />
+                <span className="text-xs font-medium text-gray-600">
+                  Barcode Available
+                </span>
+              </div>
               <button
-                onClick={() =>
-                  window.open(location.googleMapLink, "_blank")
-                }
-                className="inline-flex items-center gap-1 text-xs font-medium
-                           text-blue-600 hover:underline w-fit"
+                onClick={() => window.open(asset.barcodeImageUrl, "_blank")}
+                className="text-xs font-medium text-blue-600 hover:text-blue-700"
               >
-                View Map
-                <ExternalLink className="h-3 w-3" />
+                View
               </button>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Utilities */}
-        <div className="flex items-center gap-4 pt-2">
-          <div className="flex items-center gap-1.5">
-            <Barcode className="h-4 w-4 text-slate-400" />
-            {asset?.barcodeImageUrl ? (
-              <a
-                href={asset.barcodeImageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs font-medium text-blue-600 hover:underline"
-              >
-                View Barcode
-              </a>
-            ) : (
-              <span className="text-xs text-slate-400">No barcode</span>
-            )}
+        {/* Date Info */}
+        {asset.installationDate && (
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <Calendar className="w-4 h-4" />
+            <span>
+              Installed:{" "}
+              <span className="font-semibold text-gray-700">
+                {formatDate(asset.installationDate, "long")}
+              </span>
+            </span>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* ================= Actions ================= */}
-      <div className="border-t border-slate-100 bg-slate-50/60 px-5 py-3">
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            onClick={onView}
-            className="inline-flex items-center justify-center gap-1.5
-                       rounded-lg bg-white border border-slate-200
-                       px-3 py-2 text-xs font-medium text-slate-700
-                       hover:bg-slate-100 transition"
-          >
-            <Eye className="h-4 w-4" />
-            View
-          </button>
-
-          <button
-            onClick={onEdit}
-            className="inline-flex items-center justify-center gap-1.5
-                       rounded-lg bg-white border border-slate-200
-                       px-3 py-2 text-xs font-medium text-slate-700
-                       hover:bg-slate-100 transition"
-          >
-            <Edit2 className="h-4 w-4" />
-            Edit
-          </button>
-
-          <button
-            onClick={onDelete}
-            className="inline-flex items-center justify-center gap-1.5
-                       rounded-lg bg-red-50 border border-red-200
-                       px-3 py-2 text-xs font-medium text-red-600
-                       hover:bg-red-100 transition"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </button>
+      {/* Actions Footer */}
+      <div className="border-t border-gray-100 bg-gray-50/50 px-6 py-3">
+        <div className="grid grid-cols-4 gap-2">
+          <ActionButton icon={Eye} onClick={onView} />
+          <ActionButton icon={Edit2} onClick={onEdit} />
+          <ActionButton
+            icon={Download}
+            onClick={() => onDownload(asset)}
+            disabled={!asset.barcodeImageUrl}
+            loading={downloading}
+          />
+          <ActionButton icon={Trash2} onClick={onDelete} variant="danger" />
         </div>
       </div>
     </div>

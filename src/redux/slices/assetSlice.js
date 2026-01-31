@@ -28,6 +28,20 @@ export const deleteAsset = createAsyncThunk("/delete/asset", async (id) => {
   const res = await AssetServices.deleteAssetApi(id);
   return res.data;
 });
+export const downloadAssetById = createAsyncThunk(
+  "/download/asset/:id",
+  async (id) => {
+    const res = await AssetServices.downloadAssetById(id);
+    return res.data;
+  },
+);
+export const downloadMultipleAssetById = createAsyncThunk(
+  "/download/multiple/asset",
+  async (values) => {
+    const res = await AssetServices.downloadMultipleAssetById(values);
+    return res.data;
+  },
+);
 
 const assetSlice = createSlice({
   name: "asset",
@@ -39,6 +53,8 @@ const assetSlice = createSlice({
     isDeletingAsset: false,
     allAssetsData: null,
     assetDetails: null,
+    assetToDownloadId: null,
+    isDownloadingMultipleAssets:false,
   },
   reducers: {
     clearAssetDetails: (state) => {
@@ -101,11 +117,33 @@ const assetSlice = createSlice({
       .addCase(deleteAsset.rejected, (state, action) => {
         state.isDeletingAsset = false;
         toast.error(action.error.message);
-      });
+      })
+      .addCase(downloadAssetById.pending, (state, action) => {
+        state.assetToDownloadId = action.meta.arg;
+      })
+      .addCase(downloadAssetById.fulfilled, (state, action) => {
+        state.assetToDownloadId = null;
+        toast.success("Asset downloaded successfully");
+      })
+      .addCase(downloadAssetById.rejected, (state, action) => {
+        state.assetToDownloadId = null;
+        toast.error(action.error.message);
+      })
+      .addCase(downloadMultipleAssetById.pending, (state, action) => {
+        state.isDownloadingMultipleAssets = true;
+      })
+      .addCase(downloadMultipleAssetById.fulfilled, (state, action) => {
+        state.isDownloadingMultipleAssets = false;
+        toast.success("Downloaded selected assets successfully");
+      })
+      .addCase(downloadMultipleAssetById.rejected, (state, action) => {
+        state.isDownloadingMultipleAssets = false;
+        toast.error(action.error.message);
+      })
   },
 });
 
-export const {clearAssetDetails} = assetSlice.actions;
+export const { clearAssetDetails } = assetSlice.actions;
 // Export reducer
 const { reducer } = assetSlice;
 export default reducer;

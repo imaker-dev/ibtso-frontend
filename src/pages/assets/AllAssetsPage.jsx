@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
   Calendar,
+  Download,
   Edit2,
   ExternalLink,
   Eye,
@@ -12,7 +13,11 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { deleteAsset, fetchAllAssets } from "../../redux/slices/assetSlice";
+import {
+  deleteAsset,
+  downloadAssetById,
+  fetchAllAssets,
+} from "../../redux/slices/assetSlice";
 import SmartTable from "../../components/layout/SmartTable";
 import { Package, MapPin, Barcode } from "lucide-react";
 import { formatDate } from "../../utils/dateFormatter";
@@ -25,6 +30,7 @@ import SearchBar from "../../components/SearchBar";
 import GridStateHandler from "../../components/layout/GridStateHandler";
 import AssetCard from "./AssetCard";
 import AssetCardSkeleton from "./AssetCardSkeleton";
+import { downloadBlob } from "../../utils/blob";
 
 const AllAssetsPage = () => {
   const dispatch = useDispatch();
@@ -35,9 +41,10 @@ const AllAssetsPage = () => {
 
   const [view, setView] = useStoredViewMode("all-assets", "list");
 
-  const { allAssetsData, loading, isDeletingAsset } = useSelector(
-    (state) => state.asset,
-  );
+  const { allAssetsData, loading, isDeletingAsset, assetToDownloadId } =
+    useSelector((state) => state.asset);
+  const isAnyActivityRuning = loading || isDeletingAsset || assetToDownloadId;
+
   const { data, total } = allAssetsData || {};
   const fetchAssets = () => {
     dispatch(fetchAllAssets());
@@ -50,6 +57,14 @@ const AllAssetsPage = () => {
   const clearAssetStates = () => {
     setShowDeleteOverlay(false);
     setSelectedAsset(null);
+  };
+
+  const handleDownloadAsset = async (asset) => {
+      const fileName = `${asset?.assetNo || "file"}_${asset?.brand || "brand"}`;
+
+    await handleResponse(dispatch(downloadAssetById(asset?._id)), (res) => {
+      downloadBlob({ data: res.payload, fileName });
+    });
   };
 
   const assetColumns = [
@@ -175,22 +190,35 @@ const AllAssetsPage = () => {
 
   const rowActions = [
     {
-      label: "View Details",
+      label: "View Asset",
       onClick: (asset) => navigate(`/assets/asset?assetId=${asset?._id}`),
       icon: Eye,
+      disabled: isAnyActivityRuning,
     },
     {
-      label: "Update Details",
+      label: "Update Asset",
       onClick: (asset) => navigate(`/assets/add?assetId=${asset?._id}`),
       icon: Edit2,
+      disabled: isAnyActivityRuning,
+      color:"blue"
+      
+    },
+    {
+      label: "Download Asset",
+      onClick: (asset) => handleDownloadAsset(asset),
+      icon: Download,
+      color:"emerald",
+      disabled: isAnyActivityRuning,
+      loading: (asset) => assetToDownloadId === asset?._id,
     },
     {
       label: "Delete Asset",
       onClick: (asset) => {
         (setSelectedAsset(asset), setShowDeleteOverlay(true));
       },
-      type: "danger",
+      color: "red",
       icon: Trash2,
+      disabled: isAnyActivityRuning,
     },
   ];
 
@@ -249,6 +277,8 @@ const AllAssetsPage = () => {
                   setSelectedAsset(asset);
                   setShowDeleteOverlay(true);
                 }}
+                onDownload={(asset) => handleDownloadAsset(asset)}
+                downloading={assetToDownloadId === asset._id}
               />
             ))}
           </GridStateHandler>

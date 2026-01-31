@@ -20,4 +20,10 @@ export default false
       deleteAssetApi:(id) => {
         return Api.delete(`/assets/${id}`)
       },
+      downloadAssetById:(id) => {
+        return Api.get(`/barcodes/download-qr/${id}`,{responseType:"blob"})
+      },
+      downloadMultipleAssetById:(values) => {
+        return Api.post(`/barcodes//download-multiple-qr`,{assetIds:values},{responseType:"blob"})
+      }
     };

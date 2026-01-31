@@ -24,8 +24,8 @@ export const fetchDealerById = createAsyncThunk("/fetch/dealer/:id", async (id) 
   const res = await DealerServices.getDealerByIdApi(id);
   return res.data;
 });
-export const downloadDealerBarcodeById = createAsyncThunk("/download/dealer/barcode/:id", async (id) => {
-  const res = await DealerServices.downloadDealerAllBarcodeApi(id);
+export const downloadDealerBarcodeById = createAsyncThunk("/download/dealer/barcode/:id", async ({dealerId,startDate,endDate}) => {
+  const res = await DealerServices.downloadDealerAllBarcodeApi(dealerId,startDate,endDate);
   return res.data;
 });
 
@@ -92,7 +92,7 @@ const dealerSlice = createSlice({
         toast.error(action.error.message);
       })
       .addCase(downloadDealerBarcodeById.pending, (state,action) => {
-        state.dealerBarcodeToDownloadId = action.meta.arg;
+        state.dealerBarcodeToDownloadId = action.meta.arg.dealerId;
       })
       .addCase(downloadDealerBarcodeById.fulfilled, (state, action) => {
         state.dealerBarcodeToDownloadId = null;

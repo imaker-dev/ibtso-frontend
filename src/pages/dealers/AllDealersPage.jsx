@@ -32,12 +32,21 @@ import DealerStatusBadge from "./DealerStatusBadge";
 import GridStateHandler from "../../components/layout/GridStateHandler";
 import DealerCardSkeleton from "./DealerCardSkeleton";
 import DealerCard from "./DealerCard";
+import DealerAssetDownloadModal from "./DealerAssetDownloadModal";
 
 const AllDealersPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const { allDealersData, loading, dealerBarcodeToDownloadId } = useSelector(
+    (state) => state.dealer,
+  );
+
+  const { data, total, totalPages } = allDealersData || {};
+
   const [view, setView] = useStoredViewMode("all-dealers", "list");
+  const [showDownloadOverlay, setShowDownloadOverlay] = useState(false);
+  const [selectedDealer, setSelectedDealer] = useState(null);
 
   const fetchDealers = () => {
     dispatch(fetchAllDealers());
@@ -46,11 +55,25 @@ const AllDealersPage = () => {
     fetchDealers();
   }, []);
 
-  const { allDealersData, loading, dealerBarcodeToDownloadId } = useSelector(
-    (state) => state.dealer,
-  );
+  const resetDealerStates = () => {
+    setShowDownloadOverlay(false);
+    setSelectedDealer(null);
+  };
 
-  const { data, total, totalPages } = allDealersData || {};
+  const handleDownloadBarcode = async ({
+    fileName,
+    dealerId,
+    startDate,
+    endDate,
+  }) => {
+    await handleResponse(
+      dispatch(downloadDealerBarcodeById({ dealerId, startDate, endDate })),
+      (res) => {
+        downloadBlob({ data: res.payload, fileName });
+        resetDealerStates();
+      },
+    );
+  };
 
   const dealerColumns = [
     {
@@ -144,15 +167,6 @@ const AllDealersPage = () => {
     },
   ];
 
-  const handleDownloadBarcode = async (dealer) => {
-    const fileName = `${dealer?.name}-barcode`;
-    await handleResponse(
-      dispatch(downloadDealerBarcodeById(dealer._id)),
-      (res) => {
-        downloadBlob({ data: res.payload, fileName });
-      },
-    );
-  };
   const rowActions = [
     {
       label: "View Details",
@@ -165,13 +179,17 @@ const AllDealersPage = () => {
       onClick: (dealer) => navigate(`/dealers/add?dealerId=${dealer._id}`),
       icon: Edit2,
       disabled: dealerBarcodeToDownloadId,
+      color: "blue",
     },
     {
       label: "Download",
       type: "success",
-      onClick: (dealer) => handleDownloadBarcode(dealer),
+      onClick: (dealer) => {
+        (setSelectedDealer(dealer), setShowDownloadOverlay(true));
+      },
       icon: Download,
       loading: (dealer) => dealerBarcodeToDownloadId === dealer._id,
+      color: "emerald",
     },
   ];
 
@@ -198,53 +216,69 @@ const AllDealersPage = () => {
   ];
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="All Dealers"
-        description="Browse the list of dealers, view details, and manage their information."
-        actions={actions}
-      />
+    <>
+      <div className="space-y-6">
+        <PageHeader
+          title="All Dealers"
+          description="Browse the list of dealers, view details, and manage their information."
+          actions={actions}
+        />
 
-      <div className="flex items-center gap-2">
-        <SearchBar className="py-3" />
+        <div className="flex items-center gap-2">
+          <SearchBar className="py-3" />
 
-        <Tabs tabs={tabs} value={view} onChange={(value) => setView(value)} />
+          <Tabs tabs={tabs} value={view} onChange={(value) => setView(value)} />
+        </div>
+
+        {view === "grid" ? (
+          <GridStateHandler
+            loading={loading}
+            data={data}
+            columns={3}
+            emptyMessage="No dealers found"
+            emptyDescription="There are no dealers added yet. Once dealers are created, they will appear here with their contact details, location, and status."
+            emptyIcon={Store}
+            renderSkeleton={(i) => <DealerCardSkeleton key={i} />}
+          >
+            {(data || []).map((dealer) => (
+              <DealerCard
+                key={dealer._id}
+                dealer={dealer}
+                onView={() =>
+                  navigate(`/dealers/dealer?dealerId=${dealer._id}`)
+                }
+                onDownload={() => (
+                  setSelectedDealer(dealer),
+                  setShowDownloadOverlay(true)
+                )}
+                onUpdate={() => navigate(`/dealers/add?dealerId=${dealer._id}`)}
+                downloading={dealerBarcodeToDownloadId === dealer._id}
+                disableActions={dealerBarcodeToDownloadId}
+              />
+            ))}
+          </GridStateHandler>
+        ) : (
+          <SmartTable
+            title="All Dealers"
+            totalcount={total ?? 0}
+            data={data || []}
+            columns={dealerColumns}
+            actions={rowActions}
+            emptyMessage="No dealers found"
+            emptyDescription="There are no dealers added yet. Once dealers are created, they will appear here with their contact details, location, and status."
+            loading={loading}
+          />
+        )}
       </div>
 
-      {view === "grid" ? (
-        <GridStateHandler
-          loading={loading}
-          data={data}
-          columns={3}
-          emptyMessage="No dealers found"
-          emptyDescription="There are no dealers added yet. Once dealers are created, they will appear here with their contact details, location, and status."
-          emptyIcon={Store}
-          renderSkeleton={(i) => <DealerCardSkeleton key={i} />}
-        >
-          {(data || []).map((dealer) => (
-            <DealerCard
-              key={dealer._id}
-              dealer={dealer}
-              onView={() => navigate(`/dealers/dealer?dealerId=${dealer._id}`)}
-              onDownload={() => handleDownloadBarcode(dealer)}
-              downloading={dealerBarcodeToDownloadId === dealer._id}
-              disableActions={dealerBarcodeToDownloadId}
-            />
-          ))}
-        </GridStateHandler>
-      ) : (
-        <SmartTable
-          title="All Dealers"
-          totalcount={total ?? 0}
-          data={data || []}
-          columns={dealerColumns}
-          actions={rowActions}
-          emptyMessage="No dealers found"
-          emptyDescription="There are no dealers added yet. Once dealers are created, they will appear here with their contact details, location, and status."
-          loading={loading}
-        />
-      )}
-    </div>
+      <DealerAssetDownloadModal
+        isOpen={showDownloadOverlay}
+        onClose={resetDealerStates}
+        onSubmit={handleDownloadBarcode}
+        dealer={selectedDealer}
+        loading={dealerBarcodeToDownloadId}
+      />
+    </>
   );
 };
 

@@ -9,6 +9,7 @@ import {
   Edit2,
   ExternalLink,
   Eye,
+  Loader2,
   Mail,
   MapPin,
   Package,
@@ -22,18 +23,25 @@ import SmartTable from "../../components/layout/SmartTable";
 import { useNavigate } from "react-router-dom";
 import AssetStatusBadge from "../assets/AssetStatusBadge";
 import AssetDeleteModal from "../../partial/asset/AssetDeleteModal";
-import { deleteAsset } from "../../redux/slices/assetSlice";
+import {
+  deleteAsset,
+  downloadMultipleAssetById,
+} from "../../redux/slices/assetSlice";
 import { handleResponse } from "../../utils/helpers/helpers";
 import NoDataFound from "../../components/NoDataFound";
 import DealerDetailsSkeleton from "./DealerDetailsSkeleton";
 import DealerStatusBadge from "./DealerStatusBadge";
+import SearchBar from "../../components/SearchBar";
+import { downloadBlob } from "../../utils/blob";
 
 const DealerDetailsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { dealerId } = useQueryParams();
 
-  const { isDeletingAsset } = useSelector((state) => state.asset);
+  const { isDeletingAsset, isDownloadingMultipleAssets } = useSelector(
+    (state) => state.asset,
+  );
   const { delearDetails, isFetchingDealerDetails } = useSelector(
     (state) => state.dealer,
   );
@@ -41,10 +49,23 @@ const DealerDetailsPage = () => {
 
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
+  const [selectedAssetId, setSelectedAssetId] = useState([]);
+
+  const downloadSelectedAssets = async () => {
+    const fileName = `dealer-assets-${dealerId}`;
+    await handleResponse(
+      dispatch(downloadMultipleAssetById(selectedAssetId)),
+      (res) => {
+        downloadBlob({ data: res.payload, fileName });
+        setSelectedAssetId([]);
+      },
+    );
+  };
 
   const fetchDealerDetails = () => {
     dispatch(fetchDealerById(dealerId));
   };
+
   useEffect(() => {
     if (dealerId) {
       fetchDealerDetails();
@@ -142,14 +163,15 @@ const DealerDetailsPage = () => {
       label: "Update Details",
       onClick: (asset) => navigate(`/assets/add?assetId=${asset?._id}`),
       icon: Edit2,
+      color: "blue",
     },
     {
       label: "Delete Asset",
       onClick: (asset) => {
         (setSelectedAsset(asset), setShowDeleteOverlay(true));
       },
-      type: "danger",
       icon: Trash2,
+      color: "red",
     },
   ];
 
@@ -187,7 +209,6 @@ const DealerDetailsPage = () => {
       onClick: () => navigate(`/dealers/add?dealerId=${dealerId}`),
     },
   ];
-
   return (
     <>
       <div className="space-y-6">
@@ -309,6 +330,32 @@ const DealerDetailsPage = () => {
           </div>
         </div>
 
+        <div className="flex items-center gap-3">
+          <SearchBar className="py-2.5" />
+
+          {selectedAssetId?.length > 0 && (
+            <button
+              onClick={downloadSelectedAssets}
+              disabled={isDownloadingMultipleAssets}
+              className={`btn inline-flex items-center gap-2 bg-emerald-600 text-white hover:bg-emerald-700`}
+            >
+              {isDownloadingMultipleAssets ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Downloading
+                </>
+              ) : (
+                <>
+                  Download
+                  <span className="inline-flex items-center justify-center rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">
+                    {selectedAssetId.length}
+                  </span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
         <SmartTable
           title="Dealer Assets"
           totalcount={assetCount ?? 0}
@@ -318,6 +365,10 @@ const DealerDetailsPage = () => {
           emptyMessage="No assets found"
           emptyDescription="This dealer does not have any assets assigned yet. Once assets are allocated, they will appear here with their details and status."
           loading={isFetchingDealerDetails}
+          selectable
+          rowKey="id"
+          selectedRows={selectedAssetId}
+          onSelectionChange={setSelectedAssetId}
         />
       </div>
 
