@@ -8,6 +8,7 @@ import {
   Calendar,
   Download,
   Edit,
+  ExternalLink,
   MapPin,
   Package,
   Phone,
@@ -17,16 +18,18 @@ import { formatDate } from "../../utils/dateFormatter";
 import AssetDetailsSkeleton from "./AssetDetailsSkeleton";
 import AssetStatusBadge from "./AssetStatusBadge";
 import NoDataFound from "../../components/NoDataFound";
+import { useNavigate } from "react-router-dom";
 
 const AssetDetailsPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { assetId } = useQueryParams();
 
   const { assetDetails, isFetchingDetails } = useSelector(
     (state) => state.asset,
   );
 
-  const { dealer, creator } = assetDetails || {};
+  const { dealerId, creator } = assetDetails || {};
 
   useEffect(() => {
     if (assetId) {
@@ -39,7 +42,7 @@ const AssetDetailsPage = () => {
       label: "Update Asset",
       type: "secondary",
       icon: Edit,
-      onClick: () => navigate(`/assets/add`),
+      onClick: () => navigate(`/assets/add?assetId=${assetId}`),
     },
   ];
 
@@ -63,8 +66,7 @@ const AssetDetailsPage = () => {
       <PageHeader
         title={"Asset Details"}
         description="View detailed information, current status, and related metadata for this asset."
-        badge={<AssetStatusBadge status={assetDetails?.status} />}
-        // actions={actions}
+        actions={actions}
         showBackButton
       />
 
@@ -73,10 +75,14 @@ const AssetDetailsPage = () => {
         <div className="md:col-span-2 space-y-6">
           {/* Basic Information */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900  flex items-center gap-2 border-b border-slate-200 p-5">
-              <Package className="h-5 w-5 text-secondary-800" />
-              Basic Information
-            </h2>
+            <div className="flex justify-between items-center border-b border-slate-200 p-5">
+              <h2 className="text-lg font-semibold text-gray-900  flex items-center gap-2 ">
+                <Package className="h-5 w-5 text-secondary-800" />
+                Basic Information
+              </h2>
+              <AssetStatusBadge status={assetDetails?.status} />
+            </div>
+
             <div className="p-5 grid sm:grid-cols-2 gap-6">
               <div>
                 <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
@@ -222,43 +228,6 @@ const AssetDetailsPage = () => {
 
         {/* Right Column - Location & Dealer */}
         <div className="space-y-6">
-          {/* Asset Location */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-slate-200 p-5">
-              <MapPin className="h-5 w-5 text-secondary-800" />
-              Asset Location
-            </h2>
-            <div className="p-5 space-y-3">
-              <p className="text-sm text-gray-900 font-medium">
-                {assetDetails?.location?.address || "N/A"}
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <p className="text-gray-600 font-medium">Latitude</p>
-                  <p className="text-gray-900 font-semibold">
-                    {assetDetails?.location?.latitude || "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-600 font-medium">Longitude</p>
-                  <p className="text-gray-900 font-semibold">
-                    {assetDetails?.location?.longitude || "N/A"}
-                  </p>
-                </div>
-              </div>
-              {assetDetails?.location?.googleMapLink && (
-                <a
-                  href={assetDetails?.location.googleMapLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block w-full text-center px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-                >
-                  View on Map
-                </a>
-              )}
-            </div>
-          </div>
-
           {/* Dealer Information */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-slate-200 p-5">
@@ -271,7 +240,7 @@ const AssetDetailsPage = () => {
                   Shop Name
                 </p>
                 <p className="text-sm font-semibold text-gray-900">
-                  {dealer?.shopName || "N/A"}
+                  {dealerId?.shopName || "N/A"}
                 </p>
               </div>
 
@@ -280,7 +249,7 @@ const AssetDetailsPage = () => {
                   Dealer Name
                 </p>
                 <p className="text-sm font-semibold text-gray-900">
-                  {dealer?.name || "N/A"}
+                  {dealerId?.name || "N/A"}
                 </p>
               </div>
 
@@ -289,7 +258,7 @@ const AssetDetailsPage = () => {
                   Dealer Code
                 </p>
                 <p className="text-sm font-mono bg-gray-50 p-2 rounded border border-gray-200 text-gray-900">
-                  {dealer?.dealerCode || "N/A"}
+                  {dealerId?.dealerCode || "N/A"}
                 </p>
               </div>
 
@@ -298,11 +267,11 @@ const AssetDetailsPage = () => {
                   Phone
                 </p>
                 <a
-                  href={`tel:${dealer?.phone}`}
+                  href={`tel:${dealerId?.phone}`}
                   className="text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
                 >
                   <Phone className="h-4 w-4" />
-                  {dealer?.phone || "N/A"}
+                  {dealerId?.phone || "N/A"}
                 </a>
               </div>
 
@@ -311,10 +280,10 @@ const AssetDetailsPage = () => {
                   Email
                 </p>
                 <a
-                  href={`mailto:${dealer?.email}`}
+                  href={`mailto:${dealerId?.email}`}
                   className="text-sm font-semibold text-blue-600 hover:text-blue-700"
                 >
-                  {dealer?.email || "N/A"}
+                  {dealerId?.email || "N/A"}
                 </a>
               </div>
 
@@ -323,37 +292,20 @@ const AssetDetailsPage = () => {
                   Location
                 </p>
                 <p className="text-xs text-gray-900">
-                  {dealer?.location?.address || "N/A"}
+                  {dealerId?.location?.address || "N/A"}
                 </p>
-              </div>
-            </div>
-          </div>
 
-          {/* Created By Information */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-slate-200 p-5">
-              <Package className="h-5 w-5 text-secondary-800" />
-              Created By
-            </h2>
-            <div className="p-5 space-y-3">
-              <div>
-                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
-                  Name
-                </p>
-                <p className="text-sm font-semibold text-gray-900">
-                  {creator?.name || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
-                  Email
-                </p>
-                <a
-                  href={`mailto:${creator?.email}`}
-                  className="text-sm font-semibold text-blue-600 hover:text-blue-700"
-                >
-                  {creator?.email || "N/A"}
-                </a>
+                {dealerId?.location?.googleMapLink && (
+                  <a
+                    href={dealerId.location.googleMapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+                  >
+                    View on Map
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
               </div>
             </div>
           </div>

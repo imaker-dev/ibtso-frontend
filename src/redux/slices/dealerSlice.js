@@ -9,6 +9,13 @@ export const createDealer = createAsyncThunk(
     return res.data;
   },
 );
+export const updateDealer = createAsyncThunk(
+  "/update/dealer",
+  async ({id,values}) => {
+    const res = await DealerServices.updateDealerApi(id,values);
+    return res.data;
+  },
+);
 export const fetchAllDealers = createAsyncThunk("/fetch/dealers", async () => {
   const res = await DealerServices.getAllDealersApi();
   return res.data;
@@ -28,11 +35,16 @@ const dealerSlice = createSlice({
     loading: false,
     isFetchingDealerDetails:false,
     isCreatingDealer: false,
+    isUpdatingDealer: false,
     allDealersData: null,
     fetchDealerById: null,
     dealerBarcodeToDownloadId:null,
   },
-  reducers: {},
+  reducers: {
+    clearDealerDetails: (state) => {
+      state.delearDetails = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(createDealer.pending, (state) => {
@@ -44,6 +56,17 @@ const dealerSlice = createSlice({
       })
       .addCase(createDealer.rejected, (state, action) => {
         state.isCreatingDealer = false;
+        toast.error(action.error.message);
+      })
+      .addCase(updateDealer.pending, (state) => {
+        state.isUpdatingDealer = true;
+      })
+      .addCase(updateDealer.fulfilled, (state, action) => {
+        state.isUpdatingDealer = false;
+        toast.success(action.payload.message);
+      })
+      .addCase(updateDealer.rejected, (state, action) => {
+        state.isUpdatingDealer = false;
         toast.error(action.error.message);
       })
       .addCase(fetchAllDealers.pending, (state) => {
@@ -81,6 +104,9 @@ const dealerSlice = createSlice({
       })
   },
 });
+
+
+export const { clearDealerDetails } = dealerSlice.actions;
 
 // Export reducer
 const { reducer } = dealerSlice;

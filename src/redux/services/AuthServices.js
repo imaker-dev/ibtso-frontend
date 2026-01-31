@@ -8,4 +8,7 @@ export default false
         signinApi: (values) => {
             return Api.post("/auth/login", values);
         },
+        getMeDataApi:() => {
+            return Api.get(`/auth/me`)
+        }
     };

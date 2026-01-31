@@ -16,7 +16,10 @@ const dealerValidationSchema = Yup.object().shape({
   name: Yup.string()
     .min(3, "Minimum 3 characters")
     .required("Name is required"),
-  phone: Yup.string().required("Phone number is required"),
+  phone: Yup.string()
+    .matches(/^[0-9]{10}$/, "Mobile number must be exactly 10 digits")
+    .required("Phone number is required"),
+
   email: Yup.string().email("Invalid email").required("Email is required"),
   shopName: Yup.string()
     .min(3, "Minimum 3 characters")
@@ -24,16 +27,9 @@ const dealerValidationSchema = Yup.object().shape({
   vatRegistration: Yup.string()
     .min(5, "Minimum 5 characters")
     .required("VAT registration is required"),
-
   address: Yup.string()
     .min(10, "Minimum 10 characters")
     .required("Address is required"),
-  latitude: Yup.number()
-    .typeError("Latitude must be a number")
-    .required("Latitude is required"),
-  longitude: Yup.number()
-    .typeError("Longitude must be a number")
-    .required("Longitude is required"),
   googleMapLink: Yup.string()
     .url("Invalid URL")
     .required("Google Maps link is required"),
@@ -48,17 +44,15 @@ const SimpleError = ({ name }) => (
 );
 
 /* -------------------- Component -------------------- */
-const DealerForm = ({ onSubmit, loading = false }) => {
+const DealerForm = ({ onSubmit, loading = false, dealer }) => {
   const initialValues = {
-    name: "",
-    phone: "",
-    email: "",
-    shopName: "",
-    vatRegistration: "",
-    address: "",
-    latitude: "",
-    longitude: "",
-    googleMapLink: "",
+    name: dealer?.name || "",
+    phone: dealer?.phone || "",
+    email: dealer?.email || "",
+    shopName: dealer?.shopName || "",
+    vatRegistration: dealer?.vatRegistration || "",
+    address: dealer?.location?.address || "",
+    googleMapLink: dealer?.location?.googleMapLink || "",
   };
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
@@ -70,8 +64,6 @@ const DealerForm = ({ onSubmit, loading = false }) => {
       vatRegistration: values.vatRegistration,
       location: {
         address: values.address,
-        latitude: Number(values.latitude),
-        longitude: Number(values.longitude),
         googleMapLink: values.googleMapLink,
       },
     };
@@ -82,6 +74,7 @@ const DealerForm = ({ onSubmit, loading = false }) => {
   return (
     <Formik
       initialValues={initialValues}
+      enableReinitialize
       validationSchema={dealerValidationSchema}
       onSubmit={handleSubmit}
     >
@@ -127,7 +120,11 @@ const DealerForm = ({ onSubmit, loading = false }) => {
                   <Phone className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
                   <Field
                     name="phone"
-                    placeholder="+1 234 567 8900"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={10}
+                    placeholder="9876543210"
                     className="w-full pl-10 form-input py-3"
                   />
                 </div>
@@ -195,34 +192,6 @@ const DealerForm = ({ onSubmit, loading = false }) => {
                 <SimpleError name="address" />
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Latitude
-                  </label>
-                  <Field
-                    name="latitude"
-                    type="number"
-                    placeholder="12.9716"
-                    className="w-full form-input py-3"
-                  />
-                  <SimpleError name="latitude" />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Longitude
-                  </label>
-                  <Field
-                    name="longitude"
-                    type="number"
-                    placeholder="77.5946"
-                    className="w-full form-input py-3"
-                  />
-                  <SimpleError name="longitude" />
-                </div>
-              </div>
-
               <div>
                 <label className="block text-sm font-medium mb-1">
                   Google Maps Link
@@ -248,11 +217,10 @@ const DealerForm = ({ onSubmit, loading = false }) => {
 
             <button
               type="submit"
-              // disabled={loading || !dirty}
-              className="btn flex-1 py-3 bg-primary-500 hover:bg-primary-600 text-white disabled:bg-slate-200"
+              className="btn flex-1 py-3 bg-primary-500 hover:bg-primary-600 text-white"
             >
               {loading && <Loader className="w-5 h-5 animate-spin mr-2" />}
-              Create Dealer Profile
+              {dealer ? "Update Dealer Profile" : "Create Dealer Profile"}
             </button>
           </div>
         </Form>

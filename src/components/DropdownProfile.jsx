@@ -8,6 +8,7 @@ function DropdownProfile({ align, onLogoutClick }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const {meData} = useSelector((state) => state.auth);
+  console.log(meData)
   const trigger = useRef(null);
   const dropdown = useRef(null);
 
@@ -47,7 +48,7 @@ function DropdownProfile({ align, onLogoutClick }) {
         aria-expanded={dropdownOpen}
       >
         {/* Avatar Circle with Initial */}
-        <div className="w-8 h-8 bg-primary text-white flex items-center justify-center rounded-full font-semibold">
+        <div className="w-8 h-8 bg-primary-500 text-white flex items-center justify-center rounded-full font-semibold">
           {meData?.name ? meData.name.charAt(0).toUpperCase() : "A"}
         </div>
 

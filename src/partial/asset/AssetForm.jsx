@@ -21,13 +21,6 @@ const assetValidationSchema = Yup.object().shape({
     unit: Yup.string().required("Unit is required"),
   }),
 
-  location: Yup.object().shape({
-    address: Yup.string().min(10).required("Address is required"),
-    // latitude: Yup.number().typeError("Must be a number").required("Required"),
-    // longitude: Yup.number().typeError("Must be a number").required("Required"),
-    // googleMapLink: Yup.string().url("Invalid URL"),
-  }),
-
   status: Yup.string().required("Status is required"),
 });
 
@@ -45,30 +38,26 @@ const AssetForm = ({
   loading = false,
   dealers = [],
   brands = [],
+  asset,
 }) => {
   const initialValues = {
-    fixtureNo: "",
-    assetNo: "",
-    brand: "",
-    standType: "",
-    dealerId: "",
-    installationDate: "",
+    fixtureNo: asset?.fixtureNo || "",
+    assetNo: asset?.assetNo || "",
+    brand: asset?.brand || "",
+    standType: asset?.standType || "",
+    dealerId: asset?.dealerId?._id || "",
+    installationDate: asset?.installationDate
+      ? asset.installationDate.split("T")[0]
+      : "",
 
     dimension: {
-      length: "",
-      height: "",
-      depth: "",
-      unit: "cm",
+      length: asset?.dimension?.length || "",
+      height: asset?.dimension?.height || "",
+      depth: asset?.dimension?.depth || "",
+      unit: asset?.dimension?.unit || "cm",
     },
 
-    location: {
-      address: "",
-      latitude: "",
-      longitude: "",
-      googleMapLink: "",
-    },
-
-    status: "ACTIVE",
+    status: asset?.status || "ACTIVE",
   };
 
   const handleSubmit = async (values, { resetForm }) => {
@@ -80,11 +69,6 @@ const AssetForm = ({
         height: Number(values.dimension.height),
         depth: Number(values.dimension.depth),
       },
-      location: {
-        ...values.location,
-        latitude: Number(values.location.latitude),
-        longitude: Number(values.location.longitude),
-      },
     };
 
     if (onSubmit) await onSubmit({ values: payload, resetForm });
@@ -93,6 +77,7 @@ const AssetForm = ({
   return (
     <Formik
       initialValues={initialValues}
+      enableReinitialize
       validationSchema={assetValidationSchema}
       onSubmit={handleSubmit}
     >
@@ -249,57 +234,6 @@ const AssetForm = ({
             </div>
           </section>
 
-          {/* -------- Location -------- */}
-          <section className="bg-white rounded-xl">
-            <div className="text-xl font-bold p-5 border-b border-slate-200 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-blue-600" />
-              Location
-            </div>
-
-            <div className="space-y-6 p-5">
-              <div>
-                <Field
-                  as="textarea"
-                  name="location.address"
-                  placeholder="Address"
-                  className="w-full form-textarea resize-none"
-                />
-                <SimpleError name="location.address" />
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div>
-                  <Field
-                    name="location.latitude"
-                    type="number"
-                    placeholder="Latitude"
-                    className="w-full form-input py-3"
-                  />
-                  <SimpleError name="location.latitude" />
-                </div>
-
-                <div>
-                  <Field
-                    name="location.longitude"
-                    type="number"
-                    placeholder="Longitude"
-                    className="w-full form-input py-3"
-                  />
-                  <SimpleError name="location.longitude" />
-                </div>
-              </div>
-
-              <div>
-                <Field
-                  name="location.googleMapLink"
-                  placeholder="Google Maps Link"
-                  className="w-full form-input py-3"
-                />
-                <SimpleError name="location.googleMapLink" />
-              </div>
-            </div>
-          </section>
-
           {/* -------- Actions -------- */}
           <div className="flex gap-4">
             <button type="reset" className="btn py-3 flex-1 border">
@@ -312,7 +246,7 @@ const AssetForm = ({
               className="btn py-3 flex-1 bg-primary-500 text-white"
             >
               {loading && <Loader className="w-5 h-5 animate-spin mr-2" />}
-              Create Asset
+              {asset ? "Update Asset" : "Create Asset"}
             </button>
           </div>
         </Form>

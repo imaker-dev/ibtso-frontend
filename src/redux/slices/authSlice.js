@@ -9,14 +9,17 @@ export const signin = createAsyncThunk("/admin/signin", async (values) => {
   const res = await AuthServices.signinApi(values);
   return res.data;
 });
-
+export const fetchMeData = createAsyncThunk("/fetch/me/data", async () => {
+  const res = await AuthServices.getMeDataApi();
+  return res.data;
+});
 
 const authSlice = createSlice({
   name: "auth",
   initialState: {
     logIn,
-    loading:false,
-    isLogging:false,
+    loading: false,
+    isLogging: false,
     meData: null,
   },
   reducers: {
@@ -34,17 +37,24 @@ const authSlice = createSlice({
       .addCase(signin.fulfilled, (state, action) => {
         state.isLogging = false;
         state.logIn = true;
-        localStorage.setItem(
-          TOKEN_KEYS.ACCESS,
-          action.payload.token
-        );
+        localStorage.setItem(TOKEN_KEYS.ACCESS, action.payload.token);
         toast.success("Logged in successfully");
       })
       .addCase(signin.rejected, (state, action) => {
         state.isLogging = false;
         toast.error(action.error.message);
       })
-
+      .addCase(fetchMeData.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchMeData.fulfilled, (state, action) => {
+        state.loading = false;
+        state.meData = action.payload.data;
+      })
+      .addCase(fetchMeData.rejected, (state, action) => {
+        state.loading = false;
+        toast.error(action.error.message);
+      });
   },
 });
 

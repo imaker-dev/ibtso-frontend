@@ -5,19 +5,19 @@ import { usePreventNumberInputScroll, useScrollToTop } from "./hooks/useScroll";
 import AuthPage from "./pages/AuthPage";
 import AuthenticatedRoutes from "./components/AuthenticatedRoutes";
 import AppSkeleton from "./components/layout/AppSkeleton";
+import { fetchMeData } from "./redux/slices/authSlice";
 
 const App = () => {
   const dispatch = useDispatch();
 
   const { logIn,loading,meData } = useSelector((state) => state.auth);
 
-  // const logIn = true;
 
-  // useEffect(() => {
-  //   if (logIn) {
-  //     dispatch(fetchMeData());
-  //   }
-  // }, [logIn]);
+  useEffect(() => {
+    if (logIn) {
+      dispatch(fetchMeData());
+    }
+  }, [logIn]);
 
   useScrollToTop();
   usePreventNumberInputScroll();

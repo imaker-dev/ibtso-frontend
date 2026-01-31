@@ -82,19 +82,6 @@ const AssetDetailsSkeleton = () => {
 
         {/* Right Column */}
         <div className="space-y-6">
-          {/* Asset Location */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-            <SectionHeaderSkeleton />
-            <div className="p-5 space-y-4">
-              <Shimmer width="100%" height={16} />
-              <div className="grid grid-cols-2 gap-4">
-                <InfoBlockSkeleton />
-                <InfoBlockSkeleton />
-              </div>
-              <Shimmer width="100%" height={36} rounded="lg" />
-            </div>
-          </div>
-
           {/* Dealer Information */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
             <SectionHeaderSkeleton />
@@ -104,15 +91,6 @@ const AssetDetailsSkeleton = () => {
               <InfoBlockSkeleton wide />
               <InfoBlockSkeleton />
               <InfoBlockSkeleton wide />
-            </div>
-          </div>
-
-          {/* Created By */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-            <SectionHeaderSkeleton />
-            <div className="p-5 space-y-4">
-              <InfoBlockSkeleton />
-              <InfoBlockSkeleton />
             </div>
           </div>
         </div>

@@ -2,7 +2,16 @@ import React, { useEffect, useState } from "react";
 import PageHeader from "../../components/layout/PageHeader";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Edit2, Eye, LayoutGrid, List, Plus, Trash2 } from "lucide-react";
+import {
+  Calendar,
+  Edit2,
+  ExternalLink,
+  Eye,
+  LayoutGrid,
+  List,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { deleteAsset, fetchAllAssets } from "../../redux/slices/assetSlice";
 import SmartTable from "../../components/layout/SmartTable";
 import { Package, MapPin, Barcode } from "lucide-react";
@@ -49,42 +58,19 @@ const AllAssetsPage = () => {
       key: "asset",
       render: (asset) => (
         <div className="flex items-center gap-3">
-          {/* Icon */}
           <div className="grid h-10 w-10 place-items-center rounded-md border border-slate-200 bg-white">
             <Package className="h-5 w-5 text-slate-700" />
           </div>
 
-          {/* Asset info */}
-          <div>
-            <div className="text-sm font-semibold text-slate-900">
-              {asset?.assetNo}
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-slate-900 truncate">
+              {asset?.assetNo || "—"}
             </div>
 
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xs font-medium text-slate-500">
-                Fixture · {asset?.fixtureNo}
-              </span>
-              <span className="text-slate-400 text-xs">•</span>
-              <span className="text-xs font-medium text-slate-500">
-                {asset?.brand}
-              </span>
+            <div className="text-xs font-medium text-slate-500 mt-0.5 truncate">
+              Fixture · {asset?.fixtureNo || "—"} • {asset?.brand || "—"}
             </div>
           </div>
-        </div>
-      ),
-    },
-
-    {
-      label: "Dealer",
-      key: "dealer",
-      render: (asset) => (
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-slate-900">
-            {asset?.dealer?.name || "—"}
-          </span>
-          <span className="text-xs text-slate-500">
-            {asset?.dealer?.shopName || "—"}
-          </span>
         </div>
       ),
     },
@@ -93,9 +79,24 @@ const AllAssetsPage = () => {
       label: "Stand / Type",
       key: "standType",
       render: (asset) => (
-        <span className="text-sm font-medium text-slate-700">
-          {asset?.standType}
+        <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
+          {asset?.standType || "—"}
         </span>
+      ),
+    },
+
+    {
+      label: "Dealer",
+      key: "dealer",
+      render: (asset) => (
+        <div className="min-w-0">
+          <div className="text-sm font-semibold text-slate-900 truncate">
+            {asset?.dealerId?.name || "—"}
+          </div>
+          <div className="text-xs font-medium text-slate-500 truncate">
+            {asset?.dealerId?.shopName || "—"}
+          </div>
+        </div>
       ),
     },
 
@@ -103,11 +104,28 @@ const AllAssetsPage = () => {
       label: "Location",
       key: "location",
       render: (asset) => (
-        <div className="flex items-start gap-2 max-w-[220px]">
+        <div className="flex items-start gap-2 max-w-[240px]">
           <MapPin className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
-          <span className="text-xs text-slate-600 line-clamp-2">
-            {asset?.location?.address}
-          </span>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-slate-600 line-clamp-2">
+              {asset?.location?.address || "—"}
+            </span>
+
+            {asset?.location?.googleMapLink ? (
+              <button
+                onClick={() =>
+                  window.open(asset.location.googleMapLink, "_blank")
+                }
+                className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+              >
+                View Map
+                <ExternalLink className="h-3 w-3" />
+              </button>
+            ) : (
+              <span className="text-xs text-slate-400">Map not available</span>
+            )}
+          </div>
         </div>
       ),
     },
@@ -116,9 +134,12 @@ const AllAssetsPage = () => {
       label: "Installed On",
       key: "installationDate",
       render: (asset) => (
-        <span className="text-sm font-medium text-slate-700">
-          {formatDate(asset?.installationDate, "long")}
-        </span>
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-slate-400" />
+          <span className="text-xs font-medium text-slate-700">
+            {formatDate(asset?.installationDate, "long")}
+          </span>
+        </div>
       ),
     },
 
@@ -204,7 +225,7 @@ const AllAssetsPage = () => {
         />
 
         <div className="flex items-center gap-2">
-          <SearchBar className="py-3"/>
+          <SearchBar className="py-3" />
           <Tabs tabs={tabs} value={view} onChange={setView} />
         </div>
 

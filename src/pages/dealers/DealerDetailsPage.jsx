@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchDealerById } from "../../redux/slices/dealerSlice";
 import {
   Barcode,
+  Edit,
+  Edit2,
   ExternalLink,
   Eye,
   Mail,
@@ -24,6 +26,7 @@ import { deleteAsset } from "../../redux/slices/assetSlice";
 import { handleResponse } from "../../utils/helpers/helpers";
 import NoDataFound from "../../components/NoDataFound";
 import DealerDetailsSkeleton from "./DealerDetailsSkeleton";
+import DealerStatusBadge from "./DealerStatusBadge";
 
 const DealerDetailsPage = () => {
   const dispatch = useDispatch();
@@ -31,7 +34,9 @@ const DealerDetailsPage = () => {
   const { dealerId } = useQueryParams();
 
   const { isDeletingAsset } = useSelector((state) => state.asset);
-  const { delearDetails, isFetchingDealerDetails } = useSelector((state) => state.dealer);
+  const { delearDetails, isFetchingDealerDetails } = useSelector(
+    (state) => state.dealer,
+  );
   const { dealer, assets, assetCount } = delearDetails || {};
 
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
@@ -81,22 +86,9 @@ const DealerDetailsPage = () => {
       label: "Stand / Type",
       key: "standType",
       render: (asset) => (
-        <span className="text-sm font-medium text-slate-700">
-          {asset?.standType}
+        <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
+          {asset?.standType || "—"}
         </span>
-      ),
-    },
-
-    {
-      label: "Location",
-      key: "location",
-      render: (asset) => (
-        <div className="flex items-start gap-2 max-w-[220px]">
-          <MapPin className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
-          <span className="text-xs text-slate-600 line-clamp-2">
-            {asset?.location?.address}
-          </span>
-        </div>
       ),
     },
 
@@ -147,6 +139,11 @@ const DealerDetailsPage = () => {
       icon: Eye,
     },
     {
+      label: "Update Details",
+      onClick: (asset) => navigate(`/assets/add?assetId=${asset?._id}`),
+      icon: Edit2,
+    },
+    {
       label: "Delete Asset",
       onClick: (asset) => {
         (setSelectedAsset(asset), setShowDeleteOverlay(true));
@@ -168,8 +165,8 @@ const DealerDetailsPage = () => {
     });
   };
 
-  if(isFetchingDealerDetails){
-    return <DealerDetailsSkeleton />
+  if (isFetchingDealerDetails) {
+    return <DealerDetailsSkeleton />;
   }
   if (!isFetchingDealerDetails && !delearDetails) {
     return (
@@ -182,12 +179,22 @@ const DealerDetailsPage = () => {
     );
   }
 
+  const actions = [
+    {
+      label: "Update Dealer",
+      type: "secondary",
+      icon: Edit,
+      onClick: () => navigate(`/dealers/add?dealerId=${dealerId}`),
+    },
+  ];
+
   return (
     <>
       <div className="space-y-6">
         <PageHeader
           title="Dealer Details"
           description="View and manage dealer information, contact details, and associated assets."
+          actions={actions}
           showBackButton
         />
 
@@ -296,19 +303,7 @@ const DealerDetailsPage = () => {
                 <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
                   Status
                 </p>
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${dealer?.isActive ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}
-                >
-                  {dealer?.isActive ? "Active" : "Inactive"}
-                </span>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
-                  User ID
-                </p>
-                <p className="text-xs font-mono text-gray-600 bg-gray-50 p-2 rounded border border-gray-200 break-all">
-                  {dealer?.userId || "N/A"}
-                </p>
+                <DealerStatusBadge status={dealer.isActive} />
               </div>
             </div>
           </div>

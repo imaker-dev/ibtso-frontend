@@ -11,6 +11,8 @@ import {
   List,
   LayoutGrid,
   Download,
+  Edit2,
+  ExternalLink,
 } from "lucide-react";
 import PageHeader from "../../components/layout/PageHeader";
 import { useDispatch, useSelector } from "react-redux";
@@ -60,12 +62,12 @@ const AllDealersPage = () => {
             <Store className="h-5 w-5 text-slate-700" />
           </div>
 
-          <div>
-            <div className="text-sm font-semibold text-slate-900">
-              {dealer?.name}
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-slate-900 truncate">
+              {dealer?.name || "—"}
             </div>
-            <div className="text-xs font-medium text-slate-500 mt-0.5">
-              {dealer?.shopName}
+            <div className="text-xs font-medium text-slate-500 truncate mt-0.5">
+              {dealer?.shopName || "—"}
             </div>
           </div>
         </div>
@@ -78,13 +80,15 @@ const AllDealersPage = () => {
       render: (dealer) => (
         <div className="flex flex-col gap-1 text-xs text-slate-600">
           <div className="flex items-center gap-1.5">
-            <Mail className="h-3.5 w-3.5 text-slate-400" />
-            <span className="truncate max-w-[180px]">{dealer?.email}</span>
+            <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+            <span className="truncate max-w-[180px]">
+              {dealer?.email || "—"}
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <Phone className="h-3.5 w-3.5 text-slate-400" />
-            <span>{dealer?.phone}</span>
+            <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+            <span>{dealer?.phone || "—"}</span>
           </div>
         </div>
       ),
@@ -94,11 +98,28 @@ const AllDealersPage = () => {
       label: "Location",
       key: "location",
       render: (dealer) => (
-        <div className="flex items-start gap-2 max-w-[220px]">
+        <div className="flex items-start gap-2 max-w-[240px]">
           <MapPin className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
-          <span className="text-xs text-slate-600 line-clamp-2">
-            {dealer?.location?.address}
-          </span>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-slate-600 line-clamp-2">
+              {dealer?.location?.address || "—"}
+            </span>
+
+            {dealer?.location?.googleMapLink ? (
+              <button
+                onClick={() =>
+                  window.open(dealer.location.googleMapLink, "_blank")
+                }
+                className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+              >
+                View Map
+                <ExternalLink className="h-3 w-3" />
+              </button>
+            ) : (
+              <span className="text-xs text-slate-400">Map not available</span>
+            )}
+          </div>
         </div>
       ),
     },
@@ -109,7 +130,7 @@ const AllDealersPage = () => {
       render: (dealer) => (
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-slate-400" />
-          <span className="text-sm font-medium text-slate-700">
+          <span className="text-xs font-medium text-slate-700">
             {formatDate(dealer?.createdAt, "long")}
           </span>
         </div>
@@ -126,7 +147,7 @@ const AllDealersPage = () => {
   const handleDownloadBarcode = async (dealer) => {
     const fileName = `${dealer?.name}-barcode`;
     await handleResponse(
-      dispatch(downloadDealerBarcodeById(dealer.id)),
+      dispatch(downloadDealerBarcodeById(dealer._id)),
       (res) => {
         downloadBlob({ data: res.payload, fileName });
       },
@@ -134,9 +155,15 @@ const AllDealersPage = () => {
   };
   const rowActions = [
     {
-      label: "View",
+      label: "View Details",
       onClick: (dealer) => navigate(`/dealers/dealer?dealerId=${dealer._id}`),
       icon: Eye,
+      disabled: dealerBarcodeToDownloadId,
+    },
+    {
+      label: "Update Dealer",
+      onClick: (dealer) => navigate(`/dealers/add?dealerId=${dealer._id}`),
+      icon: Edit2,
       disabled: dealerBarcodeToDownloadId,
     },
     {
@@ -144,7 +171,7 @@ const AllDealersPage = () => {
       type: "success",
       onClick: (dealer) => handleDownloadBarcode(dealer),
       icon: Download,
-      loading: (dealer) => dealerBarcodeToDownloadId === dealer.id,
+      loading: (dealer) => dealerBarcodeToDownloadId === dealer._id,
     },
   ];
 
@@ -200,7 +227,7 @@ const AllDealersPage = () => {
               dealer={dealer}
               onView={() => navigate(`/dealers/dealer?dealerId=${dealer._id}`)}
               onDownload={() => handleDownloadBarcode(dealer)}
-              downloading={dealerBarcodeToDownloadId === dealer.id}
+              downloading={dealerBarcodeToDownloadId === dealer._id}
               disableActions={dealerBarcodeToDownloadId}
             />
           ))}
