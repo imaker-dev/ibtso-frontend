@@ -72,68 +72,72 @@ export default function RecentActivity({ data }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* ================= Recent Assets ================= */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between p-5 border-b border-slate-200">
-          <div className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">
-              Recent Assets
-            </h2>
+      <div>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between p-5 border-b border-slate-200">
+            <div className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-blue-600" />
+              <h2 className="text-lg font-semibold text-gray-900">
+                Recent Assets
+              </h2>
+            </div>
+
+            <Link
+              to={"/assets"}
+              className="text-sm font-medium text-blue-600 hover:underline flex items-center gap-1"
+            >
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
 
-          <Link
-            to={"/assets"}
-            className="text-sm font-medium text-blue-600 hover:underline flex items-center gap-1"
-          >
-            View all
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="p-5 space-y-4">
-          {assets.length === 0 ? (
-            <NoDataFound
-              icon={Package}
-              title="No assets yet"
-              description="Assets will appear here once added."
-            />
-          ) : (
-            assets.map((asset) => <AssetCard key={asset._id} asset={asset} />)
-          )}
+          <div className="p-5 space-y-4">
+            {assets.length === 0 ? (
+              <NoDataFound
+                icon={Package}
+                title="No assets yet"
+                description="Assets will appear here once added."
+              />
+            ) : (
+              assets.map((asset) => <AssetCard key={asset._id} asset={asset} />)
+            )}
+          </div>
         </div>
       </div>
 
       {/* ================= Recent Dealers ================= */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between p-5 border-b border-slate-200">
-          <div className="flex items-center gap-2">
-            <Store className="h-5 w-5 text-purple-600" />
-            <h2 className="text-lg font-semibold text-gray-900">
-              Recent Dealers
-            </h2>
+      <div>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between p-5 border-b border-slate-200">
+            <div className="flex items-center gap-2">
+              <Store className="h-5 w-5 text-purple-600" />
+              <h2 className="text-lg font-semibold text-gray-900">
+                Recent Dealers
+              </h2>
+            </div>
+
+            <Link
+              to={"/dealers"}
+              className="text-sm font-medium text-purple-600 hover:underline flex items-center gap-1"
+            >
+              View all
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
 
-          <Link
-            to={"/dealers"}
-            className="text-sm font-medium text-purple-600 hover:underline flex items-center gap-1"
-          >
-            View all
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="p-5 space-y-4">
-          {dealers.length === 0 ? (
-            <NoDataFound
-              icon={Store}
-              title="No dealers yet"
-              description="Dealers will appear here once created."
-            />
-          ) : (
-            dealers.map((dealer) => (
-              <DealerCard key={dealer._id} dealer={dealer} />
-            ))
-          )}
+          <div className="p-5 space-y-4">
+            {dealers.length === 0 ? (
+              <NoDataFound
+                icon={Store}
+                title="No dealers yet"
+                description="Dealers will appear here once created."
+              />
+            ) : (
+              dealers.map((dealer) => (
+                <DealerCard key={dealer._id} dealer={dealer} />
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

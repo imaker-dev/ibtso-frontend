@@ -217,18 +217,27 @@ const AssetForm = ({
 
               <div>
                 <label className="block text-sm font-medium mb-1">Dealer</label>
+
                 <Field
                   as="select"
                   name="dealerId"
                   className="w-full form-select py-3"
+                  disabled={!dealers || dealers.length === 0}
                 >
-                  <option value="">Select Dealer</option>
-                  {dealers?.map((d) => (
-                    <option key={d?._id} value={d?._id}>
-                      {d?.name} • {d?.shopName}
-                    </option>
-                  ))}
+                  {!dealers || dealers.length === 0 ? (
+                    <option value="">No dealers available</option>
+                  ) : (
+                    <>
+                      <option value="">Select Dealer</option>
+                      {dealers.map((d) => (
+                        <option key={d?._id} value={d?._id}>
+                          {d?.name} • {d?.shopName}
+                        </option>
+                      ))}
+                    </>
+                  )}
                 </Field>
+
                 <SimpleError name="dealerId" />
               </div>
             </div>

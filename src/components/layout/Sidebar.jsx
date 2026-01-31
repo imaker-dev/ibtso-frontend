@@ -111,10 +111,15 @@ function Sidebar({
           
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
+            <div className="w-10 h-10">
+              <img
+              src="/Images/logo.png"
+              alt="logo"
+              className="w-full object-cover"
+            />
             </div>
-            <h1 className="text-xl font-bold text-gray-900 hidden sm:block">Asset Manager</h1>
+            
+            <h1 className="text-xl font-bold text-gray-900 hidden sm:block">IBTSO</h1>
           </div>
         </div>
 

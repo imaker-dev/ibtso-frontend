@@ -8,7 +8,6 @@ function DropdownProfile({ align, onLogoutClick }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const {meData} = useSelector((state) => state.auth);
-  console.log(meData)
   const trigger = useRef(null);
   const dropdown = useRef(null);
 

@@ -16,7 +16,6 @@ const axiosInstance = axios.create({
   headers: {
     // Default headers, but we'll modify them conditionally
     Authorization: getBearerToken(),
-    "ngrok-skip-browser-warning": "true",
   },
 });
 

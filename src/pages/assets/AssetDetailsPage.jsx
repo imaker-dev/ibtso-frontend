@@ -218,7 +218,17 @@ const AssetDetailsPage = () => {
                 </div>
               </div>
 
-              <button className="w-full px-4 py-2 bg-gray-50 text-gray-900 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors font-medium text-sm flex items-center justify-center gap-2">
+              <button
+                onClick={() => {
+                  if (assetDetails?.barcodeImageUrl) {
+                    window.open(assetDetails.barcodeImageUrl, "_blank");
+                  }
+                }}
+                disabled={!assetDetails?.barcodeImageUrl}
+                className="w-full px-4 py-2 bg-gray-50 text-gray-900 rounded-lg border border-gray-200
+             hover:bg-gray-100 transition-colors font-medium text-sm
+             flex items-center justify-center gap-2 disabled:opacity-60"
+              >
                 <Download className="h-4 w-4" />
                 Download Barcode
               </button>
