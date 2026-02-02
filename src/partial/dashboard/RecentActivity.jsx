@@ -3,6 +3,7 @@ import { formatDate } from "../../utils/dateFormatter";
 import AssetStatusBadge from "../../pages/assets/AssetStatusBadge";
 import DealerStatusBadge from "../../pages/dealers/DealerStatusBadge";
 import { Link } from "react-router-dom";
+import NoDataFound from "../../components/NoDataFound";
 
 // Asset Card Component
 const AssetCard = ({ asset }) => {
@@ -97,7 +98,7 @@ const DealerCard = ({ dealer }) => {
 };
 
 // Main Component
-export default function RecentActivity({ assets,dealers }) {
+export default function RecentActivity({ assets, dealers }) {
   return (
     <div className="space-y-8">
       {/* ================= Recent Assets Section ================= */}
@@ -111,7 +112,7 @@ export default function RecentActivity({ assets,dealers }) {
               <h2 className="text-lg font-semibold text-gray-900">
                 Recent Assets
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-gray-600 mt-0.5">
                 Latest inventory additions
               </p>
             </div>
@@ -122,20 +123,19 @@ export default function RecentActivity({ assets,dealers }) {
           </div>
         </div>
 
-        {assets?.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center">
-            <Package className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-700 font-medium">No assets yet</p>
-            <p className="text-gray-600 text-sm mt-1">
-              Assets will appear here once added to the system
-            </p>
-          </div>
-        ) : (
+        {assets?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {assets?.slice(0, 3)?.map((asset) => (
               <AssetCard key={asset?._id} asset={asset} />
             ))}
           </div>
+        ) : (
+          <NoDataFound
+            icon={Package}
+            title="No assets yet"
+            description="Assets will appear here once added to the system"
+            className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center"
+          />
         )}
       </div>
 
@@ -150,7 +150,7 @@ export default function RecentActivity({ assets,dealers }) {
               <h2 className="text-lg font-semibold text-gray-900">
                 Recent Dealers
               </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-gray-600 mt-0.5">
                 Latest dealer registrations
               </p>
             </div>
@@ -161,20 +161,19 @@ export default function RecentActivity({ assets,dealers }) {
           </div>
         </div>
 
-        {dealers?.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center">
-            <Store className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-700 font-medium">No dealers yet</p>
-            <p className="text-gray-600 text-sm mt-1">
-              Dealers will appear here once registered in the system
-            </p>
-          </div>
-        ) : (
+        {dealers?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {dealers?.slice(0, 3).map((dealer) => (
               <DealerCard key={dealer?._id} dealer={dealer} />
             ))}
           </div>
+        ) : (
+          <NoDataFound
+            icon={Store}
+            title="No dealers yet"
+            description="Dealers will appear here once registered in the system"
+            className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center"
+          />
         )}
       </div>
     </div>

@@ -10,8 +10,7 @@ import { fetchMeData } from "./redux/slices/authSlice";
 const App = () => {
   const dispatch = useDispatch();
 
-  const { logIn,loading,meData } = useSelector((state) => state.auth);
-
+  const { logIn, loading, meData } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (logIn) {
@@ -22,7 +21,7 @@ const App = () => {
   useScrollToTop();
   usePreventNumberInputScroll();
 
-    if (loading) {
+  if (loading) {
     return <AppSkeleton />;
   }
   return (
@@ -39,7 +38,9 @@ const App = () => {
         )}
 
         {/* Protected Routes */}
-        {logIn && <Route path="/*" element={<AuthenticatedRoutes data={meData}/>} />}
+        {logIn && (
+          <Route path="/*" element={<AuthenticatedRoutes data={meData} />} />
+        )}
       </Routes>
     </Suspense>
   );

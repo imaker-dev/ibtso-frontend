@@ -13,6 +13,7 @@ import {
   Download,
   Edit2,
   ExternalLink,
+  Tag,
 } from "lucide-react";
 import PageHeader from "../../components/layout/PageHeader";
 import { useDispatch, useSelector } from "react-redux";
@@ -95,6 +96,25 @@ const AllDealersPage = () => {
           </div>
         </div>
       ),
+    },
+    {
+      label: "Brands",
+      key: "brands",
+      render: (dealer) => {
+        const count = dealer?.totalAssignedBrands ?? 0;
+
+        return count > 0 ? (
+          <span className="inline-flex items-center gap-1 rounded-md bg-purple-50 px-2.5 py-1 text-xs font-semibold text-purple-700 border border-purple-100">
+            <Tag className="h-3.5 w-3.5" />
+            {count} Brand{count > 1 ? "s" : ""}
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+            <Tag className="h-3.5 w-3.5" />
+            None
+          </span>
+        );
+      },
     },
 
     {

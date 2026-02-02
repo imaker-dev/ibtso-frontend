@@ -13,11 +13,16 @@ import { useNavigate } from "react-router-dom";
 import { useQueryParams } from "../../hooks/useQueryParams";
 import { Loader } from "lucide-react";
 import LoaderOverlay from "../../components/LoaderOverlay";
+import { fetchAllBrands } from "../../redux/slices/brandSlice";
 
 const AddDealerPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { dealerId } = useQueryParams();
+
+    const { allBrandsData,  } = useSelector(
+      (state) => state.brand,
+    );
 
   const {
     isFetchingDealerDetails,
@@ -25,13 +30,15 @@ const AddDealerPage = () => {
     isCreatingDealer,
     isUpdatingDealer,
   } = useSelector((state) => state.dealer);
-  const { dealer } = delearDetails || {};
 
   useEffect(() => {
     if (dealerId) {
       dispatch(fetchDealerById(dealerId));
     }
 
+    if(!allBrandsData){
+      dispatch(fetchAllBrands());
+    }
     return () => {
       dispatch(clearDealerDetails());
     };
@@ -68,16 +75,16 @@ const AddDealerPage = () => {
         <DealerForm
           onSubmit={handleDealerSubmit}
           loading={isCreatingDealer || isUpdatingDealer}
-          dealer={dealer}
+          dealer={delearDetails}
+          brands={allBrandsData?.brands}
         />
 
         {/* Help Text */}
-        <div className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
-          <h3 className="font-semibold text-blue-900 mb-2">Need Help?</h3>
-          <p className="text-blue-800 text-sm">
-            To find the latitude and longitude coordinates, you can use Google
-            Maps. Right-click on the location and select the coordinates that
-            appear.
+        <div className="mt-8 p-6 bg-secondary-50 rounded-xl border border-secondary-200">
+          <h3 className="font-semibold text-secondary-900 mb-2">Need Help?</h3>
+          <p className="text-secondary-800 text-sm">
+            To get the location link, open the place in Google Maps, then copy
+            the URL from your browser’s address bar and paste it here.
           </p>
         </div>
       </div>

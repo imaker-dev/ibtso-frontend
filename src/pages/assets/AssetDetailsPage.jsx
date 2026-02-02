@@ -2,13 +2,17 @@ import React, { useEffect } from "react";
 import { useQueryParams } from "../../hooks/useQueryParams";
 import PageHeader from "../../components/layout/PageHeader";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAssetById } from "../../redux/slices/assetSlice";
+import {
+  downloadAssetById,
+  fetchAssetById,
+} from "../../redux/slices/assetSlice";
 import {
   Barcode,
   Calendar,
   Download,
   Edit,
   ExternalLink,
+  Loader2,
   MapPin,
   Package,
   Phone,
@@ -19,13 +23,15 @@ import AssetDetailsSkeleton from "./AssetDetailsSkeleton";
 import AssetStatusBadge from "./AssetStatusBadge";
 import NoDataFound from "../../components/NoDataFound";
 import { useNavigate } from "react-router-dom";
+import { handleResponse } from "../../utils/helpers/helpers";
+import { downloadBlob } from "../../utils/blob";
 
 const AssetDetailsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { assetId } = useQueryParams();
 
-  const { assetDetails, isFetchingDetails } = useSelector(
+  const { assetDetails, isFetchingDetails, assetToDownloadId } = useSelector(
     (state) => state.asset,
   );
 
@@ -45,6 +51,14 @@ const AssetDetailsPage = () => {
       onClick: () => navigate(`/assets/add?assetId=${assetId}`),
     },
   ];
+
+  const handleDownloadAsset = async () => {
+    const fileName = `${assetDetails?.assetNo || "file"}_${assetDetails?.brand || "brand"}`;
+
+    await handleResponse(dispatch(downloadAssetById(assetId)), (res) => {
+      downloadBlob({ data: res.payload, fileName });
+    });
+  };
 
   if (isFetchingDetails) {
     return <AssetDetailsSkeleton />;
@@ -219,18 +233,19 @@ const AssetDetailsPage = () => {
               </div>
 
               <button
-                onClick={() => {
-                  if (assetDetails?.barcodeImageUrl) {
-                    window.open(assetDetails.barcodeImageUrl, "_blank");
-                  }
-                }}
-                disabled={!assetDetails?.barcodeImageUrl}
+                onClick={() => handleDownloadAsset()}
+                disabled={assetToDownloadId}
                 className="w-full px-4 py-2 bg-gray-50 text-gray-900 rounded-lg border border-gray-200
              hover:bg-gray-100 transition-colors font-medium text-sm
              flex items-center justify-center gap-2 disabled:opacity-60"
               >
-                <Download className="h-4 w-4" />
-                Download Barcode
+                {assetToDownloadId ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+
+                {assetToDownloadId ? "Downloading..." : "Download Barcode"}
               </button>
             </div>
           </div>

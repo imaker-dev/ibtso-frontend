@@ -45,7 +45,7 @@ const DealerDetailsPage = () => {
   const { delearDetails, isFetchingDealerDetails } = useSelector(
     (state) => state.dealer,
   );
-  const { dealer, assets, assetCount } = delearDetails || {};
+  const { dealer, assets, assetCount, assignedBrands } = delearDetails || {};
 
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
@@ -312,6 +312,29 @@ const DealerDetailsPage = () => {
               Business Information
             </h3>
             <div className="p-5 space-y-4">
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-2">
+                  Assigned Brands
+                </p>
+
+                {assignedBrands && assignedBrands.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {assignedBrands.map((item) => (
+                      <span
+                        key={item?.brand?._id}
+                        className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 border border-blue-100"
+                      >
+                        {item?.brand?.name}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-sm text-slate-400">
+                    No brands assigned
+                  </span>
+                )}
+              </div>
+
               <div>
                 <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
                   VAT Registration

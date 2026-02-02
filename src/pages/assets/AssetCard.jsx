@@ -183,7 +183,7 @@ const AssetCard = ({
       </div>
 
       {/* Actions Footer */}
-      <div className="border-t border-gray-100 bg-gray-50/50 px-6 py-3">
+      <div className="border-t border-gray-100 bg-gray-50/50 px-6 py-4">
         <div className="grid grid-cols-4 gap-2">
           <ActionButton icon={Eye} onClick={onView} />
           <ActionButton icon={Edit2} onClick={onEdit} />

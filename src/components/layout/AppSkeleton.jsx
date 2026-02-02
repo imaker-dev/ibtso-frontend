@@ -12,7 +12,7 @@ const AppSkeleton = () => {
       {/* ================= Sidebar Skeleton ================= */}
       <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-gray-200 px-4 py-6">
         {/* Logo */}
-        <div className="flex justify-center mb-10">
+        <div className=" mb-10">
           <div className="h-8 w-32 bg-gray-200 rounded-lg" />
         </div>
 

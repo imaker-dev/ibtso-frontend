@@ -1,22 +1,4 @@
-import {
-  Gauge,
-  ShoppingCart,
-  Package,
-  Users,
-  CreditCard,
-  Tag,
-  Settings,
-  ImageIcon,
-  Menu,
-  MessagesSquare,
-  Star,
-  Users2,
-  Zap,
-  CalendarClock,
-  Repeat,
-  Percent,
-  Plus,
-} from "lucide-react";
+import { Gauge, Package, Users, Tag, Building2 } from "lucide-react";
 
 export const navConfig = [
   {
@@ -26,6 +8,19 @@ export const navConfig = [
         name: "Overview",
         icon: Gauge,
         path: "/",
+      },
+    ],
+  },
+  {
+    title: "Client Management",
+    items: [
+      {
+        name: "Clients",
+        icon: Building2,
+        children: [
+          { name: "All Clients", path: "/clients" },
+          { name: "Add Client", path: "/clients/add" },
+        ],
       },
     ],
   },
@@ -60,5 +55,10 @@ export const navConfig = [
         ],
       },
     ],
+  },
+
+  {
+    title: "Brands Management",
+    items: [{ name: "Brands", icon: Tag, path: "/brands" }],
   },
 ];

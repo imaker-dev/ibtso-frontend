@@ -63,7 +63,7 @@ function Sidebar({
     } else if (item.children) {
       return item.children.some(
         (child) =>
-          pathname === child.path || pathname.startsWith(`${child.path}/`)
+          pathname === child.path || pathname.startsWith(`${child.path}/`),
       );
     }
     return false;
@@ -80,7 +80,7 @@ function Sidebar({
         className={`fixed inset-0 bg-black/30 z-40 xl:hidden xl:z-auto transition-opacity duration-200 ${
           sidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
-         onClick={() => setSidebarOpen(!sidebarOpen)}
+        onClick={() => setSidebarOpen(!sidebarOpen)}
         aria-hidden="true"
       ></div>
 
@@ -98,29 +98,20 @@ function Sidebar({
             effectiveExpanded ? "pr-3 sm:px-2" : "justify-center"
           }`}
         >
-
-
           {/* Logo */}
-          {/* <NavLink end to="/" className="w-full flex justify-center bg-primary-50 rounded-lg p-2">
-            <img
-              src="/Images/logo.png"
-              alt="logo"
-              className="w-28 xl:w-40"
-            />
-          </NavLink> */}
-          
-          {/* Logo */}
-          <div className="flex items-center gap-3">
+          <NavLink end to="/" className="w-full flex justify-start items-center gap-2">
             <div className="w-10 h-10">
               <img
-              src="/Images/logo.png"
-              alt="logo"
-              className="w-full object-cover"
-            />
+                src="/Images/logo.png"
+                alt="logo"
+                className="w-full object-cover"
+              />
             </div>
-            
-            <h1 className="text-xl font-bold text-gray-900 hidden sm:block">IBTSO</h1>
-          </div>
+
+            <h1 className="text-xl font-bold text-gray-900 ">IBTSO</h1>
+          </NavLink>
+
+
         </div>
 
         {/* Links */}
@@ -194,7 +185,9 @@ function Sidebar({
                                       : "justify-center w-full"
                                   }`}
                                 >
-                                  <item.icon className={`shrink-0 h-6 w-6 ${iconClass} transition-colors duration-200`} />
+                                  <item.icon
+                                    className={`shrink-0 h-6 w-6 ${iconClass} transition-colors duration-200`}
+                                  />
 
                                   {effectiveExpanded && (
                                     <span className="text-sm font-medium ml-3 transition-opacity duration-200">
@@ -296,7 +289,9 @@ function Sidebar({
                                   : "justify-center w-full"
                               }`}
                             >
-                              <item.icon className={`shrink-0 h-6 w-6 ${iconClass} transition-colors duration-200`} />
+                              <item.icon
+                                className={`shrink-0 h-6 w-6 ${iconClass} transition-colors duration-200`}
+                              />
 
                               {effectiveExpanded && (
                                 <span className="text-sm font-medium ml-3 transition-opacity duration-200">

@@ -9,30 +9,35 @@ import {
   FileText,
   MapPin,
   Loader,
+  Tag,
 } from "lucide-react";
+import { brands } from "../../constants/brands";
+import MultiSelect from "../../components/MultiSelect";
 
 /* -------------------- Validation -------------------- */
 const dealerValidationSchema = Yup.object().shape({
   name: Yup.string()
     .min(3, "Minimum 3 characters")
     .required("Name is required"),
-  phone: Yup.string()
-    .matches(/^[0-9]{10}$/, "Mobile number must be exactly 10 digits")
-    .required("Phone number is required"),
+  // phone: Yup.string()
+  //   .matches(/^[0-9]{10}$/, "Mobile number must be exactly 10 digits")
+  //   .required("Phone number is required"),
 
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  shopName: Yup.string()
-    .min(3, "Minimum 3 characters")
-    .required("Shop name is required"),
-  vatRegistration: Yup.string()
-    .min(5, "Minimum 5 characters")
-    .required("VAT registration is required"),
-  address: Yup.string()
-    .min(10, "Minimum 10 characters")
-    .required("Address is required"),
-  googleMapLink: Yup.string()
-    .url("Invalid URL")
-    .required("Google Maps link is required"),
+  // email: Yup.string().email("Invalid email").required("Email is required"),
+  // shopName: Yup.string()
+  //   .min(3, "Minimum 3 characters")
+  //   .required("Shop name is required"),
+  // vatRegistration: Yup.string()
+  //   .min(5, "Minimum 5 characters")
+  //   .required("VAT registration is required"),
+  // address: Yup.string()
+  //   .min(10, "Minimum 10 characters")
+  //   .required("Address is required"),
+  // googleMapLink: Yup.string()
+  //   .url("Invalid URL")
+  //   .required("Google Maps link is required"),
+
+  brandIds: Yup.array().nullable(),
 });
 
 /* -------------------- Error Text -------------------- */
@@ -44,15 +49,26 @@ const SimpleError = ({ name }) => (
 );
 
 /* -------------------- Component -------------------- */
-const DealerForm = ({ onSubmit, loading = false, dealer }) => {
+const DealerForm = ({ onSubmit, loading = false, dealer, brands = [] }) => {
+  // Convert dealers to options for MultiSelect
+  const brandOptions = brands?.map((brand) => ({
+    value: brand._id,
+    label: `${brand.name}`,
+    data: brand,
+  }));
+
   const initialValues = {
-    name: dealer?.name || "",
-    phone: dealer?.phone || "",
-    email: dealer?.email || "",
-    shopName: dealer?.shopName || "",
-    vatRegistration: dealer?.vatRegistration || "",
-    address: dealer?.location?.address || "",
-    googleMapLink: dealer?.location?.googleMapLink || "",
+    name: dealer?.dealer?.name || "",
+    phone: dealer?.dealer?.phone || "",
+    email: dealer?.dealer?.email || "",
+    shopName: dealer?.dealer?.shopName || "",
+    vatRegistration: dealer?.dealer?.vatRegistration || "",
+    address: dealer?.dealer?.location?.address || "",
+    googleMapLink: dealer?.dealer?.location?.googleMapLink || "",
+
+    brandIds: dealer?.assignedBrands
+      ? dealer.assignedBrands.map((b) => b?.brand?._id)
+      : [],
   };
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
@@ -62,6 +78,7 @@ const DealerForm = ({ onSubmit, loading = false, dealer }) => {
       email: values.email,
       shopName: values.shopName,
       vatRegistration: values.vatRegistration,
+      brandIds: values.brandIds,
       location: {
         address: values.address,
         googleMapLink: values.googleMapLink,
@@ -78,12 +95,12 @@ const DealerForm = ({ onSubmit, loading = false, dealer }) => {
       validationSchema={dealerValidationSchema}
       onSubmit={handleSubmit}
     >
-      {({ dirty }) => (
+      {({ dirty, values, setFieldValue }) => (
         <Form autoComplete="off" className="space-y-6">
           {/* -------- Personal Info -------- */}
           <section className="bg-white rounded-xl">
             <div className="text-xl font-bold p-5 border-b border-slate-200 flex items-center gap-2">
-              <User className="w-5 h-5 text-blue-600" />
+              <User className="w-5 h-5 text-secondary-500" />
               Personal Information
             </div>
 
@@ -136,7 +153,7 @@ const DealerForm = ({ onSubmit, loading = false, dealer }) => {
           {/* -------- Business Info -------- */}
           <section className="bg-white rounded-xl">
             <div className="text-xl font-bold p-5 border-b border-slate-200 flex items-center gap-2">
-              <Store className="w-5 h-5 text-blue-600" />
+              <Store className="w-5 h-5 text-secondary-500" />
               Business Information
             </div>
 
@@ -170,10 +187,31 @@ const DealerForm = ({ onSubmit, loading = false, dealer }) => {
             </div>
           </section>
 
+          {/* -------- Brands -------- */}
+          <section className="bg-white rounded-xl">
+            <div className="text-xl font-bold p-5 border-b border-slate-200 flex items-center gap-2">
+              <Tag className="w-5 h-5 text-secondary-500" />
+              Brands
+            </div>
+
+            <div className="p-5">
+              <MultiSelect
+                options={brandOptions}
+                value={values.brandIds}
+                onChange={(ids) => setFieldValue("brandIds", ids)}
+                searchable
+                variant="tags"
+                placeholder="Search & select brands..."
+                helpText="Select brands associated with this dealer"
+              />
+              <SimpleError name="brandIds" />
+            </div>
+          </section>
+
           {/* -------- Location Info -------- */}
           <section className="bg-white rounded-xl">
             <div className="text-xl font-bold p-5 border-b border-slate-200 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-blue-600" />
+              <MapPin className="w-5 h-5 text-secondary-500" />
               Location Information
             </div>
 
@@ -207,20 +245,20 @@ const DealerForm = ({ onSubmit, loading = false, dealer }) => {
           </section>
 
           {/* -------- Actions -------- */}
-          <div className="flex gap-4">
+          <div className="flex justify-end gap-4">
             <button
               type="reset"
-              className="btn flex-1 py-3 border border-slate-300"
+              className="btn w-full lg:w-fit py-3 border bg-white hover:bg-slate-100 border-slate-300 shadow-none"
             >
               Clear Form
             </button>
 
             <button
               type="submit"
-              className="btn flex-1 py-3 bg-primary-500 hover:bg-primary-600 text-white"
+              className="btn w-full lg:w-fit py-3 bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               {loading && <Loader className="w-5 h-5 animate-spin mr-2" />}
-              {dealer ? "Update Dealer Profile" : "Create Dealer Profile"}
+              {dealer ? "Update Dealer" : "Create Dealer"}
             </button>
           </div>
         </Form>

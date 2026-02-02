@@ -3,7 +3,6 @@ import PageHeader from "../../components/layout/PageHeader";
 import { useDispatch, useSelector } from "react-redux";
 import AssetForm from "../../partial/asset/AssetForm";
 import { fetchAllDealers } from "../../redux/slices/dealerSlice";
-import { brands } from "../../constants/brands";
 import { handleResponse } from "../../utils/helpers/helpers";
 import {
   clearAssetDetails,
@@ -14,23 +13,24 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useQueryParams } from "../../hooks/useQueryParams";
 import LoaderOverlay from "../../components/LoaderOverlay";
+import { fetchAllClients } from "../../redux/slices/clientSlice";
 
 const AddAssetPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { assetId } = useQueryParams();
 
-  const { allDealersData } = useSelector((state) => state.dealer);
   const { isCreatingAsset, isUpdatingAsset, isFetchingDetails, assetDetails } =
     useSelector((state) => state.asset);
+  const { allClientsData } = useSelector((state) => state.client);
 
   useEffect(() => {
     if (assetId) {
       dispatch(fetchAssetById(assetId));
     }
 
-    if (!allDealersData) {
-      dispatch(fetchAllDealers());
+    if (!allClientsData) {
+      dispatch(fetchAllClients());
     }
 
     return () => {
@@ -68,8 +68,7 @@ const AddAssetPage = () => {
 
         <AssetForm
           onSubmit={handleAssetSubmit}
-          dealers={allDealersData?.data}
-          brands={brands}
+          clients={allClientsData?.clients}
           asset={assetDetails}
           loading={isCreatingAsset || isUpdatingAsset}
         />
