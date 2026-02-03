@@ -32,7 +32,6 @@ const ClientDetailsPage = () => {
   );
 
   const { dealerIds } = clientDetails || {};
-  console.log(dealerIds);
 
   useEffect(() => {
     if (clientId) dispatch(fetchClientById(clientId));
@@ -104,20 +103,6 @@ const ClientDetailsPage = () => {
             <span className="text-xs text-slate-600 line-clamp-2">
               {dealer?.location?.address || "—"}
             </span>
-
-            {dealer?.location?.googleMapLink ? (
-              <button
-                onClick={() =>
-                  window.open(dealer.location.googleMapLink, "_blank")
-                }
-                className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
-              >
-                View Map
-                <ExternalLink className="h-3 w-3" />
-              </button>
-            ) : (
-              <span className="text-xs text-slate-400">Map not available</span>
-            )}
           </div>
         </div>
       ),

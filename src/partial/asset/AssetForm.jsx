@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { Package, Ruler, Calendar, MapPin, Loader } from "lucide-react";
+import { Package, Ruler, Calendar, MapPin, Loader, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDealerById } from "../../redux/slices/dealerSlice";
 
@@ -12,6 +12,7 @@ const assetValidationSchema = Yup.object().shape({
 
   brand: Yup.string().required("Brand is required"),
   standType: Yup.string().required("Stand type is required"),
+  clientId: Yup.string().required("Client is required"),
   dealerId: Yup.string().required("Dealer is required"),
 
   installationDate: Yup.date().required("Installation date is required"),
@@ -34,27 +35,34 @@ const SimpleError = ({ name }) => (
   />
 );
 
+const MAX_FILES = 8;
+const MAX_SIZE_MB = 5;
+
 /* -------------------- Component -------------------- */
-const AssetForm = ({
-  onSubmit,
-  loading = false,
-  clients = [],
-  asset,
-}) => {
+const AssetForm = ({ onSubmit, loading = false, clients = [], asset }) => {
   const dispatch = useDispatch();
   const { delearDetails, isFetchingDealerDetails } = useSelector(
     (state) => state.dealer,
   );
+
   const { assignedBrands } = delearDetails || {};
+
+  useEffect(() => {
+    if (asset?.dealerId?._id) {
+      dispatch(fetchDealerById(asset?.dealerId?._id));
+    }
+  }, [asset, dispatch]);
 
   const initialValues = {
     fixtureNo: asset?.fixtureNo || "",
     assetNo: asset?.assetNo || "",
-    brand: asset?.brand || "",
-    standType: asset?.standType || "",
-    clientId: asset?.dealerId?.clientId || "",
 
+    // FIXED
+    brand: asset?.brandId?._id || "",
+    standType: asset?.standType || "",
+    clientId: asset?.clientId?._id || "",
     dealerId: asset?.dealerId?._id || "",
+
     installationDate: asset?.installationDate
       ? asset.installationDate.split("T")[0]
       : "",
@@ -67,20 +75,59 @@ const AssetForm = ({
     },
 
     status: asset?.status || "ACTIVE",
+
+    // NEW
+    images: asset?.imageUrls || [],
   };
 
   const handleSubmit = async (values, { resetForm }) => {
-    const payload = {
-      ...values,
-      dimension: {
-        ...values.dimension,
-        length: Number(values.dimension.length),
-        height: Number(values.dimension.height),
-        depth: Number(values.dimension.depth),
-      },
+    const formData = new FormData();
+
+    /* ---------- Basic Fields ---------- */
+    formData.append("fixtureNo", values.fixtureNo);
+    formData.append("assetNo", values.assetNo);
+    formData.append("standType", values.standType || "");
+    formData.append("status", values.status);
+
+    /* ---------- IDs ---------- */
+    formData.append("brandId", values.brand); // backend expects brandId
+    formData.append("dealerId", values.dealerId);
+
+    if (values.clientId) {
+      formData.append("clientId", values.clientId);
+    }
+
+    /* ---------- Date ---------- */
+    if (values.installationDate) {
+      formData.append(
+        "installationDate",
+        new Date(values.installationDate).toISOString(),
+      );
+    }
+
+    /* ---------- Dimension (JSON STRING) ---------- */
+    const dimensionPayload = {
+      length: Number(values.dimension.length),
+      height: Number(values.dimension.height),
+      depth: Number(values.dimension.depth),
+      unit: values.dimension.unit,
     };
 
-    if (onSubmit) await onSubmit({ values: payload, resetForm });
+    formData.append("dimension", JSON.stringify(dimensionPayload));
+
+    /* ---------- Images ---------- */
+    values.images.forEach((img) => {
+      if (img instanceof File) {
+        formData.append("images", img); // binary
+      } else if (typeof img === "string") {
+        formData.append("images", img); // url
+      }
+    });
+
+    /* ---------- Submit ---------- */
+    if (onSubmit) {
+      await onSubmit({ values: formData, resetForm });
+    }
   };
 
   return (
@@ -91,6 +138,7 @@ const AssetForm = ({
       onSubmit={handleSubmit}
     >
       {({ values, setFieldValue }) => {
+        console.log(initialValues);
         const selectedClient = clients.find((c) => c._id === values.clientId);
 
         const clientDealers = selectedClient?.dealerIds || [];
@@ -103,7 +151,7 @@ const AssetForm = ({
                 Asset Information
               </div>
 
-              <div className="grid sm:grid-cols-3 gap-6 p-5">
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 p-5">
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Fixture No
@@ -126,6 +174,26 @@ const AssetForm = ({
                     className="w-full form-input py-3"
                   />
                   <SimpleError name="assetNo" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Installation Date
+                  </label>
+                  <Field
+                    name="installationDate"
+                    type="date"
+                    className="w-full form-input py-3"
+                  />
+                  <SimpleError name="installationDate" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Stand Type
+                  </label>
+                  <Field name="standType" className="w-full form-input py-3" />
+                  <SimpleError name="standType" />
                 </div>
               </div>
             </section>
@@ -297,26 +365,125 @@ const AssetForm = ({
 
                   <SimpleError name="brand" />
                 </div>
+              </div>
+            </section>
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Installation Date
-                  </label>
-                  <Field
-                    name="installationDate"
-                    type="date"
-                    className="w-full form-input py-3"
+            {/* -------- Premium Images -------- */}
+            <section className="bg-white rounded-xl border border-slate-200">
+              {/* HEADER */}
+              <div className="flex items-center justify-between p-5 border-b border-slate-200">
+                <div className="flex items-center gap-2">
+                  <Package className="w-5 h-5 text-secondary-500" />
+                  <h2 className="text-xl font-bold">Asset Images</h2>
+                </div>
+
+                {values.images.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setFieldValue("images", [])}
+                    className="text-sm text-red-600 hover:underline"
+                  >
+                    Clear All
+                  </button>
+                )}
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* UPLOAD BOX */}
+                <label
+                  className={`block border border-dashed rounded-lg p-8 text-center cursor-pointer transition
+      ${
+        values.images.length >= MAX_FILES
+          ? "border-slate-200 bg-slate-50 cursor-not-allowed"
+          : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"
+      }`}
+                >
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    hidden
+                    disabled={values.images.length >= MAX_FILES}
+                    onChange={(e) => {
+                      let files = Array.from(e.target.files || []);
+
+                      // SIZE FILTER
+                      files = files.filter(
+                        (f) => f.size <= MAX_SIZE_MB * 1024 * 1024,
+                      );
+
+                      // COUNT LIMIT
+                      const remaining = MAX_FILES - values.images.length;
+                      files = files.slice(0, remaining);
+
+                      setFieldValue("images", [...values.images, ...files]);
+                    }}
                   />
-                  <SimpleError name="installationDate" />
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Stand Type
-                  </label>
-                  <Field name="standType" className="w-full form-input py-3" />
-                  <SimpleError name="standType" />
-                </div>
+                  <p className="text-sm font-medium text-slate-700">
+                    Click to upload or drag images here
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    PNG, JPG • Max {MAX_FILES} files • {MAX_SIZE_MB}MB each
+                  </p>
+                </label>
+
+                {/* COUNT INFO */}
+                {values.images.length > 0 && (
+                  <p className="text-sm text-slate-600">
+                    {values.images.length} of {MAX_FILES} images selected
+                  </p>
+                )}
+
+                {/* IMAGE GRID */}
+                {values.images.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                    {values.images.map((file, index) => {
+                      const preview =
+                        typeof file === "string"
+                          ? file
+                          : URL.createObjectURL(file);
+
+                      return (
+                        <div
+                          key={index}
+                          className="relative border border-slate-200 rounded-md overflow-hidden bg-slate-50 group"
+                        >
+                          <img
+                            src={preview}
+                            alt="preview"
+                            className="w-full h-32 object-cover"
+                          />
+
+                          {/* REMOVE BUTTON */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newImages = values.images.filter(
+                                (_, i) => i !== index,
+                              );
+                              setFieldValue("images", newImages);
+                            }}
+                            className="
+    absolute top-2 right-2
+    bg-red-500 text-white p-1 rounded-full shadow
+    
+  "
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+
+                          {/* FOOTER */}
+                          <div className="px-2 py-1 bg-white text-xs text-slate-600 truncate border-t border-slate-200">
+                            {typeof file === "string"
+                              ? file.split("/").pop()
+                              : file.name}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </section>
 

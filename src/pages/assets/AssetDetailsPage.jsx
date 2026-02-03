@@ -35,7 +35,7 @@ const AssetDetailsPage = () => {
     (state) => state.asset,
   );
 
-  const { dealerId, creator } = assetDetails || {};
+  const { dealerId, clientId, creator } = assetDetails || {};
 
   useEffect(() => {
     if (assetId) {
@@ -53,7 +53,7 @@ const AssetDetailsPage = () => {
   ];
 
   const handleDownloadAsset = async () => {
-    const fileName = `${assetDetails?.assetNo || "file"}_${assetDetails?.brand || "brand"}`;
+    const fileName = `${assetDetails?.assetNo || "file"}_${assetDetails?.brandId?.name || "brand"}`;
 
     await handleResponse(dispatch(downloadAssetById(assetId)), (res) => {
       downloadBlob({ data: res.payload, fileName });
@@ -91,7 +91,7 @@ const AssetDetailsPage = () => {
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
             <div className="flex justify-between items-center border-b border-slate-200 p-5">
               <h2 className="text-lg font-semibold text-gray-900  flex items-center gap-2 ">
-                <Package className="h-5 w-5 text-secondary-800" />
+                <Package className="h-5 w-5 text-secondary-500" />
                 Basic Information
               </h2>
               <AssetStatusBadge status={assetDetails?.status} />
@@ -127,7 +127,7 @@ const AssetDetailsPage = () => {
                   Brand
                 </p>
                 <p className="text-base font-semibold text-gray-900">
-                  {assetDetails?.brand || "N/A"}
+                  {assetDetails?.brandId?.name || "N/A"}
                 </p>
               </div>
             </div>
@@ -136,7 +136,7 @@ const AssetDetailsPage = () => {
           {/* Dimensions */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900  flex items-center gap-2 border-b border-slate-200 p-5">
-              <Package className="h-5 w-5 text-secondary-800" />
+              <Package className="h-5 w-5 text-secondary-500" />
               Dimensions
             </h2>
             <div className="p-5 grid sm:grid-cols-3 gap-4 ">
@@ -179,7 +179,7 @@ const AssetDetailsPage = () => {
           {/* Installation Details */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-slate-200 p-5">
-              <Calendar className="h-5 w-5 text-secondary-800" />
+              <Calendar className="h-5 w-5 text-secondary-500" />
               Installation & Tracking
             </h2>
             <div className="p-5 grid sm:grid-cols-2 gap-6">
@@ -205,7 +205,7 @@ const AssetDetailsPage = () => {
           {/* Barcode Section */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-slate-200 p-5">
-              <Barcode className="h-5 w-5 text-secondary-800" />
+              <Barcode className="h-5 w-5 text-secondary-500" />
               Barcode Information
             </h2>
             <div className="p-5 flex flex-col gap-4">
@@ -249,16 +249,151 @@ const AssetDetailsPage = () => {
               </button>
             </div>
           </div>
+
+          {/* Asset Images */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-slate-200 p-5">
+              <Package className="h-5 w-5 text-secondary-500" />
+              Asset Images
+            </h2>
+
+            <div className="p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {assetDetails?.imageUrls?.length ? (
+                assetDetails.imageUrls.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    alt={`asset-${i}`}
+                    className="w-full h-40 object-cover rounded-lg border border-slate-300"
+                  />
+                ))
+              ) : (
+                <p className="text-sm text-gray-500 col-span-full">
+                  No images available
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Right Column - Location & Dealer */}
         <div className="space-y-6">
+          {/* Client Information */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-200 p-5">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Store className="h-5 w-5 text-secondary-500" />
+                Client Information
+              </h2>
+
+              {clientId?._id && (
+                <button
+                  onClick={() =>
+                    navigate(`/clients/client?clientId=${clientId._id}`)
+                  }
+                  className="text-xs flex items-center gap-1 text-secondary-500 hover:text-secondary-600"
+                >
+                  View Details
+                  <ExternalLink className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Client Name
+                </p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {clientId?.name || "N/A"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Company
+                </p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {clientId?.company || "N/A"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Phone
+                </p>
+                <a
+                  href={`tel:${clientId?.phone}`}
+                  className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+                >
+                  {clientId?.phone || "N/A"}
+                </a>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Email
+                </p>
+                <a
+                  href={`mailto:${clientId?.email}`}
+                  className="text-sm font-semibold text-blue-600 hover:text-blue-700"
+                >
+                  {clientId?.email || "N/A"}
+                </a>
+              </div>
+
+              <div>
+                <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                  Address
+                </p>
+                <p className="text-xs text-gray-900">
+                  {clientId?.address || "N/A"}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                    VAT
+                  </p>
+                  <p className="text-xs text-gray-900">
+                    {clientId?.vatin || "N/A"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
+                    Country
+                  </p>
+                  <p className="text-xs text-gray-900">
+                    {clientId?.country || "N/A"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Dealer Information */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 border-b border-slate-200 p-5">
-              <Store className="h-5 w-5 text-secondary-800" />
-              Dealer Information
-            </h2>
+            <div className="flex items-center justify-between border-b border-slate-200 p-5">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <Store className="h-5 w-5 text-secondary-500" />
+                Dealer Information
+              </h2>
+
+              {dealerId?._id && (
+                <button
+                  onClick={() =>
+                    navigate(`/dealers/dealer?dealerId=${dealerId._id}`)
+                  }
+                  className="text-xs flex items-center gap-1 text-secondary-500 hover:text-secondary-600 "
+                >
+                  View Details
+                  <ExternalLink className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+
             <div className="p-5 space-y-4">
               <div>
                 <p className="text-xs font-medium text-gray-600 uppercase tracking-wider mb-1">
@@ -319,18 +454,6 @@ const AssetDetailsPage = () => {
                 <p className="text-xs text-gray-900">
                   {dealerId?.location?.address || "N/A"}
                 </p>
-
-                {dealerId?.location?.googleMapLink && (
-                  <a
-                    href={dealerId.location.googleMapLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
-                  >
-                    View on Map
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                )}
               </div>
             </div>
           </div>

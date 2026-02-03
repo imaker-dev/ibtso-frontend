@@ -93,10 +93,10 @@ const DealerDetailsPage = () => {
               <span className="text-xs font-medium text-slate-500">
                 Fixture · {asset?.fixtureNo}
               </span>
-              <span className="text-slate-400 text-xs">•</span>
+              {/* <span className="text-slate-400 text-xs">•</span>
               <span className="text-xs font-medium text-slate-500">
                 {asset?.brand}
-              </span>
+              </span> */}
             </div>
           </div>
         </div>
@@ -190,6 +190,7 @@ const DealerDetailsPage = () => {
   if (isFetchingDealerDetails) {
     return <DealerDetailsSkeleton />;
   }
+  
   if (!isFetchingDealerDetails && !delearDetails) {
     return (
       <NoDataFound

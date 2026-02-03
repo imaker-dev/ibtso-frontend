@@ -54,7 +54,7 @@ const ClientForm = ({ onSubmit, loading = false, dealers = [], client }) => {
   // Convert dealers to options for MultiSelect
   const dealerOptions = dealers.map((dealer) => ({
     value: dealer._id,
-    label: `${dealer.name} (${dealer.shopName})`,
+    label: `${dealer.name} (${dealer.shopName || "No Shop Name"})`,
     // description: `${dealer.location?.address || ''} • ${dealer.phone}`,
     data: dealer,
   }));

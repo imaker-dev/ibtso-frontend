@@ -48,13 +48,14 @@ const AllDealersPage = () => {
   const [view, setView] = useStoredViewMode("all-dealers", "list");
   const [showDownloadOverlay, setShowDownloadOverlay] = useState(false);
   const [selectedDealer, setSelectedDealer] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchDealers = () => {
-    dispatch(fetchAllDealers());
+    dispatch(fetchAllDealers({search:searchTerm}));
   };
   useEffect(() => {
     fetchDealers();
-  }, []);
+  }, [searchTerm]);
 
   const resetDealerStates = () => {
     setShowDownloadOverlay(false);
@@ -148,20 +149,6 @@ const AllDealersPage = () => {
             <span className="text-xs text-slate-600 line-clamp-2">
               {dealer?.location?.address || "—"}
             </span>
-
-            {dealer?.location?.googleMapLink ? (
-              <button
-                onClick={() =>
-                  window.open(dealer.location.googleMapLink, "_blank")
-                }
-                className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
-              >
-                View Map
-                <ExternalLink className="h-3 w-3" />
-              </button>
-            ) : (
-              <span className="text-xs text-slate-400">Map not available</span>
-            )}
           </div>
         </div>
       ),
@@ -245,7 +232,11 @@ const AllDealersPage = () => {
         />
 
         <div className="flex items-center gap-2">
-          <SearchBar className="py-3" />
+          <SearchBar
+            className="py-3"
+            placeholder="Search dealers"
+            onSearch={(value) => setSearchTerm(value)}
+          />
 
           <Tabs tabs={tabs} value={view} onChange={(value) => setView(value)} />
         </div>

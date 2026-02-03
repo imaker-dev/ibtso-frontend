@@ -96,21 +96,33 @@ const AssetCard = ({
 
       {/* Content Section */}
       <div className="px-6 py-4 space-y-4">
-        {/* Brand & Dealer */}
+        {/* Brand / Dealer / Client */}
         <div className="space-y-3">
+          {/* Brand */}
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-gray-500">Brand</span>
             <span className="text-sm font-semibold text-gray-900">
-              {asset.brand}
+              {asset.brandId?.name || "—"}
             </span>
           </div>
+
+          {/* Dealer */}
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-gray-500">Dealer</span>
             <div className="text-right">
               <p className="text-sm font-semibold text-gray-900">
-                {dealerId?.name}
+                {dealerId?.name || "—"}
               </p>
-              {/* <p className="text-xs text-gray-500">{dealerId?.shopName}</p> */}
+            </div>
+          </div>
+
+          {/* Client */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-gray-500">Client</span>
+            <div className="text-right">
+              <p className="text-sm font-semibold text-gray-900">
+                {asset.clientId?.name || "Not Assigned"}
+              </p>
             </div>
           </div>
         </div>

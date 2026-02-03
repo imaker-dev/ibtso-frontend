@@ -21,7 +21,7 @@ const AddClientPage = () => {
   const { allDealersData } = useSelector((state) => state.dealer);
   const {
     clientDetails,
-    isFetchingClientDetail,
+    isFetchingClientDetails,
     isCreatingClient,
     isUpdatingClient,
   } = useSelector((state) => state.client);
@@ -52,7 +52,7 @@ const AddClientPage = () => {
   return (
     <>
       <LoaderOverlay
-        show={clientId && isFetchingClientDetail}
+        show={clientId && isFetchingClientDetails}
         text="Fetching client details…"
       />
       <div className="space-y-6">

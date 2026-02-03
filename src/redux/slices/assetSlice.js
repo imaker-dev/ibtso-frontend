@@ -13,8 +13,8 @@ export const updateAsset = createAsyncThunk(
     return res.data;
   },
 );
-export const fetchAllAssets = createAsyncThunk("/fetch/assets", async () => {
-  const res = await AssetServices.getAllAssetsApi();
+export const fetchAllAssets = createAsyncThunk("/fetch/assets", async ({search}) => {
+  const res = await AssetServices.getAllAssetsApi(search);
   return res.data;
 });
 export const fetchAssetById = createAsyncThunk(

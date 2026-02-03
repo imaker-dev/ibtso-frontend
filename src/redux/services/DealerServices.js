@@ -5,9 +5,11 @@ export default false
       message: "You are Offline. Please turn on the internet",
     }
   : {
-      getAllDealersApi: () => {
-        return Api.get("/dealers");
+      getAllDealersApi: (search) => {
+        const params = search ? { search } : {};
+        return Api.get("/dealers", { params });
       },
+
       getDealerByIdApi: (id) => {
         return Api.get(`/dealers/${id}`);
       },

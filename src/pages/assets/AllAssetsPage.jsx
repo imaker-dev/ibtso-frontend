@@ -39,6 +39,7 @@ const AllAssetsPage = () => {
   const [showDeleteOverlay, setShowDeleteOverlay] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
 
+  const [searhTerm, setSearchTerm] = useState("");
   const [view, setView] = useStoredViewMode("all-assets", "list");
 
   const { allAssetsData, loading, isDeletingAsset, assetToDownloadId } =
@@ -46,13 +47,14 @@ const AllAssetsPage = () => {
   const isAnyActivityRuning = loading || isDeletingAsset || assetToDownloadId;
 
   const { data, total } = allAssetsData || {};
+
   const fetchAssets = () => {
-    dispatch(fetchAllAssets());
+    dispatch(fetchAllAssets({ search: searhTerm }));
   };
 
   useEffect(() => {
     fetchAssets();
-  }, []);
+  }, [searhTerm]);
 
   const clearAssetStates = () => {
     setShowDeleteOverlay(false);
@@ -60,7 +62,7 @@ const AllAssetsPage = () => {
   };
 
   const handleDownloadAsset = async (asset) => {
-      const fileName = `${asset?.assetNo || "file"}_${asset?.brand || "brand"}`;
+    const fileName = `${asset?.assetNo || "file"}_${asset?.brand || "brand"}`;
 
     await handleResponse(dispatch(downloadAssetById(asset?._id)), (res) => {
       downloadBlob({ data: res.payload, fileName });
@@ -68,38 +70,60 @@ const AllAssetsPage = () => {
   };
 
   const assetColumns = [
+    /* ---------------- ASSET ---------------- */
     {
       label: "Asset",
       key: "asset",
       render: (asset) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Icon */}
           <div className="grid h-10 w-10 place-items-center rounded-md border border-slate-200 bg-white">
             <Package className="h-5 w-5 text-slate-700" />
           </div>
 
+          {/* Text */}
           <div className="min-w-0">
+            {/* Asset No */}
             <div className="text-sm font-semibold text-slate-900 truncate">
               {asset?.assetNo || "—"}
             </div>
 
-            <div className="text-xs font-medium text-slate-500 mt-0.5 truncate">
-              Fixture · {asset?.fixtureNo || "—"} • {asset?.brand || "—"}
+            {/* Fixture */}
+            <div className="text-xs text-slate-500 truncate">
+              Fixture · {asset?.fixtureNo || "—"} ·{" "}
+              <span className="inline-flex text-[11px] font-medium text-slate-600">
+                {asset?.images?.length || 0} file
+                {(asset?.images?.length || 0) === 1 ? "" : "s"}
+              </span>
             </div>
           </div>
         </div>
       ),
     },
 
+    /* ---------------- BRAND ---------------- */
     {
-      label: "Stand / Type",
+      label: "Brand",
+      key: "brand",
+      render: (asset) => (
+        <span className="inline-flex rounded-md bg-indigo-50 px-2 py-1 text-xs font-semibold text-indigo-700">
+          {asset?.brandId?.name || "—"}
+        </span>
+      ),
+    },
+
+    /* ---------------- STAND ---------------- */
+    {
+      label: "Stand",
       key: "standType",
       render: (asset) => (
-        <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
+        <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
           {asset?.standType || "—"}
         </span>
       ),
     },
 
+    /* ---------------- DEALER ---------------- */
     {
       label: "Dealer",
       key: "dealer",
@@ -108,43 +132,43 @@ const AllAssetsPage = () => {
           <div className="text-sm font-semibold text-slate-900 truncate">
             {asset?.dealerId?.name || "—"}
           </div>
-          <div className="text-xs font-medium text-slate-500 truncate">
+          <div className="text-xs text-slate-500 truncate">
             {asset?.dealerId?.shopName || "—"}
           </div>
         </div>
       ),
     },
 
+    /* ---------------- CLIENT ---------------- */
     {
-      label: "Location",
-      key: "location",
-      render: (asset) => (
-        <div className="flex items-start gap-2 max-w-[240px]">
-          <MapPin className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
+      label: "Client",
+      key: "client",
+      render: (asset) => {
+        const client = asset?.clientId;
 
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-slate-600 line-clamp-2">
-              {asset?.location?.address || "—"}
+        if (!client) {
+          return (
+            <span className="text-xs font-medium text-slate-400">
+              Not Assigned
             </span>
+          );
+        }
 
-            {asset?.location?.googleMapLink ? (
-              <button
-                onClick={() =>
-                  window.open(asset.location.googleMapLink, "_blank")
-                }
-                className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
-              >
-                View Map
-                <ExternalLink className="h-3 w-3" />
-              </button>
-            ) : (
-              <span className="text-xs text-slate-400">Map not available</span>
-            )}
+        return (
+          <div className="min-w-0">
+            <div className="text-sm font-medium text-slate-900 truncate">
+              {client.name || "Unnamed Client"}
+            </div>
+
+            <div className="text-xs text-slate-500 truncate">
+              {client?.company || "No company"}
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
 
+    /* ---------------- INSTALLED ---------------- */
     {
       label: "Installed On",
       key: "installationDate",
@@ -158,6 +182,7 @@ const AllAssetsPage = () => {
       ),
     },
 
+    /* ---------------- BARCODE ---------------- */
     {
       label: "Barcode",
       key: "barcode",
@@ -181,6 +206,7 @@ const AllAssetsPage = () => {
       ),
     },
 
+    /* ---------------- STATUS ---------------- */
     {
       label: "Status",
       key: "status",
@@ -200,14 +226,13 @@ const AllAssetsPage = () => {
       onClick: (asset) => navigate(`/assets/add?assetId=${asset?._id}`),
       icon: Edit2,
       disabled: isAnyActivityRuning,
-      color:"blue"
-      
+      color: "blue",
     },
     {
       label: "Download Asset",
       onClick: (asset) => handleDownloadAsset(asset),
       icon: Download,
-      color:"emerald",
+      color: "emerald",
       disabled: isAnyActivityRuning,
       loading: (asset) => assetToDownloadId === asset?._id,
     },
@@ -253,7 +278,11 @@ const AllAssetsPage = () => {
         />
 
         <div className="flex items-center gap-2">
-          <SearchBar className="py-3" />
+          <SearchBar
+            className="py-3"
+            onSearch={(value) => setSearchTerm(value)}
+            placeholder="Search assets..."
+          />
           <Tabs tabs={tabs} value={view} onChange={setView} />
         </div>
 

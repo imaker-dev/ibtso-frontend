@@ -16,8 +16,8 @@ export const updateDealer = createAsyncThunk(
     return res.data;
   },
 );
-export const fetchAllDealers = createAsyncThunk("/fetch/dealers", async () => {
-  const res = await DealerServices.getAllDealersApi();
+export const fetchAllDealers = createAsyncThunk("/fetch/dealers", async ({search}) => {
+  const res = await DealerServices.getAllDealersApi(search);
   return res.data;
 });
 export const fetchDealerById = createAsyncThunk("/fetch/dealer/:id", async (id) => {

@@ -229,18 +229,6 @@ const DealerForm = ({ onSubmit, loading = false, dealer, brands = [] }) => {
                 />
                 <SimpleError name="address" />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Google Maps Link
-                </label>
-                <Field
-                  name="googleMapLink"
-                  placeholder="https://maps.google.com/?q=lat,lng"
-                  className="w-full form-input py-3"
-                />
-                <SimpleError name="googleMapLink" />
-              </div>
             </div>
           </section>
 
