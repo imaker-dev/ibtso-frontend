@@ -183,6 +183,7 @@ const AssetForm = ({ onSubmit, loading = false, clients = [], asset }) => {
                   <Field
                     name="installationDate"
                     type="date"
+                    max={new Date().toISOString().split("T")[0]}
                     className="w-full form-input py-3"
                   />
                   <SimpleError name="installationDate" />
@@ -272,22 +273,29 @@ const AssetForm = ({ onSubmit, loading = false, clients = [], asset }) => {
                   </label>
 
                   <Field
-                    as="select"
-                    name="clientId"
-                    className="w-full form-select py-3"
-                    onChange={(e) => {
-                      setFieldValue("clientId", e.target.value);
-                      setFieldValue("dealerId", "");
-                    }}
-                  >
-                    <option value="">Select Client</option>
+  as="select"
+  name="clientId"
+  className="w-full form-select py-3"
+  disabled={clients.length === 0}
+  onChange={(e) => {
+    setFieldValue("clientId", e.target.value);
+    setFieldValue("dealerId", "");
+  }}
+>
+  {clients.length === 0 ? (
+    <option value="">No client has been added</option>
+  ) : (
+    <>
+      <option value="">Select Client</option>
+      {clients.map((c) => (
+        <option key={c._id} value={c._id}>
+          {c.name} • {c.company || "No Company"}
+        </option>
+      ))}
+    </>
+  )}
+</Field>
 
-                    {clients.map((c) => (
-                      <option key={c._id} value={c._id}>
-                        {c.name} • {c.company || "No Company"}
-                      </option>
-                    ))}
-                  </Field>
 
                   <SimpleError name="clientId" />
                 </div>

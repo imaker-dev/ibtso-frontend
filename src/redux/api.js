@@ -41,7 +41,7 @@ axiosInstance.interceptors.request.use(
   (error) => {
     console.error("Request error:", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor to handle errors and unauthorized status
@@ -54,19 +54,21 @@ axiosInstance.interceptors.response.use(
       const errorMessage =
         data?.message || error.response.data.error || "Some unknown error";
 
-      if (errorMessage === "Invalid or expired token") {
-        // Logout logic
-        window.location.href = "/auth";
+      const logoutErrors = [
+        "Invalid or expired token",
+        "The user belonging to this token no longer exists",
+      ];
 
-        // toast.error("Invalid or expired token. Logging out...");
+      if (logoutErrors.includes(errorMessage)) {
         localStorage.removeItem(TOKEN_KEYS.ACCESS);
+        window.location.href = "/auth";
       }
 
       return Promise.reject(new Error(errorMessage));
     }
 
     return Promise.reject(new Error("Network error"));
-  }
+  },
 );
 
 // Utility methods for GET and POST requests

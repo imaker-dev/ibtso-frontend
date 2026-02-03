@@ -21,9 +21,9 @@ const AllClientsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { allClientsData,loading } = useSelector((state) => state.client);
+  const { allClientsData, loading } = useSelector((state) => state.client);
 
-  const { clients, totalClients,  } = allClientsData || {};
+  const { clients, totalClients } = allClientsData || {};
   const fetchClients = () => {
     dispatch(fetchAllClients());
   };
@@ -150,7 +150,7 @@ const AllClientsPage = () => {
     },
   ];
 
-    const actions = [
+  const actions = [
     {
       label: "Add Client",
       type: "secondary",
@@ -173,8 +173,8 @@ const AllClientsPage = () => {
         data={clients || []}
         columns={clientColumns}
         actions={rowActions}
-        emptyMessage="No assets found"
-        emptyDescription="There are no assets registered yet."
+        emptyMessage="No clients found"
+        emptyDescription="There are no clients registered yet."
         loading={loading}
       />
     </div>

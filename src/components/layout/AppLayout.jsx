@@ -9,10 +9,7 @@ function AppLayout({ children }) {
   const [isMobile, setIsMobile] = useState(false);
 
   // Define routes where sidebar and header should be hidden
-  const hiddenLayoutRoutes = [
-    "/conversations/conversation",
-
-  ];
+  const hiddenLayoutRoutes = ["/conversations/conversation"];
 
   // Check if current route should hide layout
   const shouldHideLayout = hiddenLayoutRoutes.includes(location.pathname);
@@ -51,11 +48,7 @@ function AppLayout({ children }) {
 
   // If layout should be hidden, render only children
   if (shouldHideLayout) {
-    return (
-      <div className="h-[100dvh] overflow-hidden">
-        {children}
-      </div>
-    );
+    return <div className="h-[100dvh] overflow-hidden">{children}</div>;
   }
 
   return (
@@ -71,10 +64,12 @@ function AppLayout({ children }) {
       {/* Content area */}
       <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
         {/* Site header */}
-        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen}/>
+        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <main className="grow bg-gray-100">
-          <div className="p-4 sm:p-6 w-full container  max-w-10xl mx-auto">{children}</div>
+          <div className="p-4 sm:p-6 w-full container  max-w-10xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>
