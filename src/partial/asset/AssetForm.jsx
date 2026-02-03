@@ -116,12 +116,28 @@ const AssetForm = ({ onSubmit, loading = false, clients = [], asset }) => {
     formData.append("dimension", JSON.stringify(dimensionPayload));
 
     /* ---------- Images ---------- */
+    const existingImages = [];
+    const newImages = [];
+
     values.images.forEach((img) => {
       if (img instanceof File) {
-        formData.append("images", img); // binary
+        newImages.push(img);
       } else if (typeof img === "string") {
-        formData.append("images", img); // url
+        try {
+          const urlObj = new URL(img);
+          existingImages.push(urlObj.pathname.replace(/^\/+/, ""));
+        } catch {
+          existingImages.push(img);
+        }
       }
+    });
+
+    /* send old images */
+    formData.append("existingImages", JSON.stringify(existingImages));
+
+    /* send new images */
+    newImages.forEach((file) => {
+      formData.append("images", file);
     });
 
     /* ---------- Submit ---------- */
@@ -138,7 +154,6 @@ const AssetForm = ({ onSubmit, loading = false, clients = [], asset }) => {
       onSubmit={handleSubmit}
     >
       {({ values, setFieldValue }) => {
-        console.log(initialValues);
         const selectedClient = clients.find((c) => c._id === values.clientId);
 
         const clientDealers = selectedClient?.dealerIds || [];
@@ -273,29 +288,28 @@ const AssetForm = ({ onSubmit, loading = false, clients = [], asset }) => {
                   </label>
 
                   <Field
-  as="select"
-  name="clientId"
-  className="w-full form-select py-3"
-  disabled={clients.length === 0}
-  onChange={(e) => {
-    setFieldValue("clientId", e.target.value);
-    setFieldValue("dealerId", "");
-  }}
->
-  {clients.length === 0 ? (
-    <option value="">No client has been added</option>
-  ) : (
-    <>
-      <option value="">Select Client</option>
-      {clients.map((c) => (
-        <option key={c._id} value={c._id}>
-          {c.name} • {c.company || "No Company"}
-        </option>
-      ))}
-    </>
-  )}
-</Field>
-
+                    as="select"
+                    name="clientId"
+                    className="w-full form-select py-3"
+                    disabled={clients.length === 0}
+                    onChange={(e) => {
+                      setFieldValue("clientId", e.target.value);
+                      setFieldValue("dealerId", "");
+                    }}
+                  >
+                    {clients.length === 0 ? (
+                      <option value="">No client has been added</option>
+                    ) : (
+                      <>
+                        <option value="">Select Client</option>
+                        {clients.map((c) => (
+                          <option key={c._id} value={c._id}>
+                            {c.name} • {c.company || "No Company"}
+                          </option>
+                        ))}
+                      </>
+                    )}
+                  </Field>
 
                   <SimpleError name="clientId" />
                 </div>
@@ -314,12 +328,10 @@ const AssetForm = ({ onSubmit, loading = false, clients = [], asset }) => {
                     onChange={(e) => {
                       const dealerId = e.target.value;
                       setFieldValue("dealerId", dealerId);
-                      setFieldValue("brand", ""); // reset brand
+                      setFieldValue("brand", "");
 
                       if (dealerId) {
                         dispatch(fetchDealerById(dealerId));
-                      } else {
-                        setDealerBrands([]);
                       }
                     }}
                   >

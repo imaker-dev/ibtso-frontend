@@ -9,7 +9,7 @@ import NoDataFound from "../../components/NoDataFound";
 const AssetCard = ({ asset }) => {
   return (
     <Link
-      to={`/assets/asset?assetId=${asset?._id}`}
+      to={`/asset-management/asset?assetId=${asset?._id}`}
       className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-4 transition-all duration-200 hover:border-blue-300 hover:shadow-md cursor-pointer"
     >
       <div className="relative z-10 space-y-3">

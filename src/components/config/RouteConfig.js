@@ -19,9 +19,9 @@ const routeConfig = [
   { path: "/clients", element: AllClientsPage },
   { path: "/clients/add", element: AddClientPage },
   { path: "/clients/client", element: ClientDetailsPage },
-  { path: "/assets", element: AllAssetsPage },
-  { path: "/assets/add", element: AddAssetPage },
-  { path: "/assets/asset", element: AssetDetailsPage },
+  { path: "/asset-management", element: AllAssetsPage },
+  { path: "/asset-management/add", element: AddAssetPage },
+  { path: "/asset-management/asset", element: AssetDetailsPage },
   { path: "/brands", element: AllBrandsPage },
 
 ];

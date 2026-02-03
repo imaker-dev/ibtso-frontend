@@ -48,7 +48,7 @@ const AssetDetailsPage = () => {
       label: "Update Asset",
       type: "secondary",
       icon: Edit,
-      onClick: () => navigate(`/assets/add?assetId=${assetId}`),
+      onClick: () => navigate(`/asset-management/add?assetId=${assetId}`),
     },
   ];
 

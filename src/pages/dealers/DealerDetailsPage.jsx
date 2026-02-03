@@ -156,12 +156,12 @@ const DealerDetailsPage = () => {
   const rowActions = [
     {
       label: "View",
-      onClick: (asset) => navigate(`/assets/asset?assetId=${asset?._id}`),
+      onClick: (asset) => navigate(`/asset-management/asset?assetId=${asset?._id}`),
       icon: Eye,
     },
     {
       label: "Update Details",
-      onClick: (asset) => navigate(`/assets/add?assetId=${asset?._id}`),
+      onClick: (asset) => navigate(`/asset-management/add?assetId=${asset?._id}`),
       icon: Edit2,
       color: "blue",
     },

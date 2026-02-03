@@ -46,11 +46,11 @@ export const navConfig = [
         children: [
           {
             name: "All Assets",
-            path: "/assets",
+            path: "/asset-management",
           },
           {
             name: "Add Asset",
-            path: "/assets/add",
+            path: "/asset-management/add",
           },
         ],
       },

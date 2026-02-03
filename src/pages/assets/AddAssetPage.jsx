@@ -45,7 +45,7 @@ const AddAssetPage = () => {
 
     await handleResponse(dispatch(action), () => {
       resetForm();
-      navigate("/assets");
+      navigate("/asset-management");
     });
   };
 

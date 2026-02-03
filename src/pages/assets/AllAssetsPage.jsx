@@ -217,13 +217,13 @@ const AllAssetsPage = () => {
   const rowActions = [
     {
       label: "View Asset",
-      onClick: (asset) => navigate(`/assets/asset?assetId=${asset?._id}`),
+      onClick: (asset) => navigate(`/asset-management/asset?assetId=${asset?._id}`),
       icon: Eye,
       disabled: isAnyActivityRuning,
     },
     {
       label: "Update Asset",
-      onClick: (asset) => navigate(`/assets/add?assetId=${asset?._id}`),
+      onClick: (asset) => navigate(`/asset-management/add?assetId=${asset?._id}`),
       icon: Edit2,
       disabled: isAnyActivityRuning,
       color: "blue",
@@ -252,7 +252,7 @@ const AllAssetsPage = () => {
       label: "Add Asset",
       type: "secondary",
       icon: Plus,
-      onClick: () => navigate(`/assets/add`),
+      onClick: () => navigate(`/asset-management/add`),
     },
   ];
 
@@ -300,8 +300,8 @@ const AllAssetsPage = () => {
               <AssetCard
                 key={asset._id}
                 asset={asset}
-                onView={() => navigate(`/assets/asset?assetId=${asset._id}`)}
-                onEdit={() => navigate(`/assets/add?assetId=${asset._id}`)}
+                onView={() => navigate(`/asset-management/asset?assetId=${asset._id}`)}
+                onEdit={() => navigate(`/asset-management/add?assetId=${asset._id}`)}
                 onDelete={() => {
                   setSelectedAsset(asset);
                   setShowDeleteOverlay(true);
