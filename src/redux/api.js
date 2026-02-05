@@ -57,11 +57,24 @@ axiosInstance.interceptors.response.use(
       const logoutErrors = [
         "Invalid or expired token",
         "The user belonging to this token no longer exists",
+        "Password recently changed. Please log in again",
       ];
 
       if (logoutErrors.includes(errorMessage)) {
         localStorage.removeItem(TOKEN_KEYS.ACCESS);
-        window.location.href = "/auth";
+        
+        // Check if user is a client based on current URL or stored data
+        const isClientRoute = window.location.pathname.includes('/client') || 
+                             window.location.pathname === '/' ||
+                             window.location.pathname.includes('/my-assets') ||
+                             window.location.pathname.includes('/change-password');
+        
+        // Redirect to appropriate login page
+        if (isClientRoute) {
+          window.location.href = "/client-auth";
+        } else {
+          window.location.href = "/auth";
+        }
       }
 
       return Promise.reject(new Error(errorMessage));

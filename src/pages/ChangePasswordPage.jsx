@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { changeClientPassword } from "../redux/slices/clientDashboardSlice";
-import { fetchMeData } from "../redux/slices/authSlice";
+import { clearLoginState } from "../redux/slices/authSlice";
+import toast from "react-hot-toast";
 
 const ChangePasswordPage = () => {
   const dispatch = useDispatch();
@@ -67,11 +68,16 @@ const ChangePasswordPage = () => {
         })
       ).unwrap();
 
-      // Refresh user data to update isTemporaryPassword flag
-      await dispatch(fetchMeData());
+      // Show success message
+      toast.success("Password changed successfully! Please login with your new password.");
 
-      // Navigate to dashboard
-      navigate("/");
+      // Logout user - clear auth state and token
+      dispatch(clearLoginState());
+
+      // Redirect to login page
+      setTimeout(() => {
+        navigate("/client-auth");
+      }, 1000);
     } catch (error) {
       // Error is already handled by the slice with toast
       console.error("Password change failed:", error);
