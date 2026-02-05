@@ -44,9 +44,13 @@ const AllAssetsPage = () => {
 
   const { allAssetsData, loading, isDeletingAsset, assetToDownloadId } =
     useSelector((state) => state.asset);
+  const { meData } = useSelector((state) => state.auth);
   const isAnyActivityRuning = loading || isDeletingAsset || assetToDownloadId;
 
   const { data, total } = allAssetsData || {};
+  
+  // Check if user is a client
+  const isClient = meData?.role === "CLIENT";
 
   const fetchAssets = () => {
     dispatch(fetchAllAssets({ search: searhTerm }));
@@ -221,13 +225,15 @@ const AllAssetsPage = () => {
       icon: Eye,
       disabled: isAnyActivityRuning,
     },
-    {
-      label: "Update Asset",
-      onClick: (asset) => navigate(`/asset-management/add?assetId=${asset?._id}`),
-      icon: Edit2,
-      disabled: isAnyActivityRuning,
-      color: "blue",
-    },
+    ...(!isClient ? [
+      {
+        label: "Update Asset",
+        onClick: (asset) => navigate(`/asset-management/add?assetId=${asset?._id}`),
+        icon: Edit2,
+        disabled: isAnyActivityRuning,
+        color: "blue",
+      },
+    ] : []),
     {
       label: "Download Asset",
       onClick: (asset) => handleDownloadAsset(asset),
@@ -236,18 +242,20 @@ const AllAssetsPage = () => {
       disabled: isAnyActivityRuning,
       loading: (asset) => assetToDownloadId === asset?._id,
     },
-    {
-      label: "Delete Asset",
-      onClick: (asset) => {
-        (setSelectedAsset(asset), setShowDeleteOverlay(true));
+    ...(!isClient ? [
+      {
+        label: "Delete Asset",
+        onClick: (asset) => {
+          (setSelectedAsset(asset), setShowDeleteOverlay(true));
+        },
+        color: "red",
+        icon: Trash2,
+        disabled: isAnyActivityRuning,
       },
-      color: "red",
-      icon: Trash2,
-      disabled: isAnyActivityRuning,
-    },
+    ] : []),
   ];
 
-  const actions = [
+  const actions = isClient ? [] : [
     {
       label: "Add Asset",
       type: "secondary",
@@ -272,8 +280,11 @@ const AllAssetsPage = () => {
     <>
       <div className="space-y-6">
         <PageHeader
-          title="All Assets"
-          description="Manage, track, and organize all registered assets from a single place."
+          title={isClient ? "My Assets" : "All Assets"}
+          description={isClient 
+            ? "View and download your assigned assets." 
+            : "Manage, track, and organize all registered assets from a single place."
+          }
           actions={actions}
         />
 

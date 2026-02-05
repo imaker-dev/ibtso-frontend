@@ -1,8 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import { NavLink, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import SidebarLinkGroup from "./SidebarLinkGroup";
-import { navConfig } from "../config/NavConfig";
+import { navConfig } from "../config/NavConfig.jsx";
+import { clientNavConfig } from "../config/ClientNavConfig.jsx";
+import { hasPermission } from "../../utils/permissions";
+import { USER_ROLES } from "../../constants/roles";
 
 function Sidebar({
   sidebarOpen,
@@ -12,11 +16,35 @@ function Sidebar({
 }) {
   const location = useLocation();
   const { pathname } = location;
+  const { meData } = useSelector((state) => state.auth);
 
   const trigger = useRef(null);
   const sidebar = useRef(null);
 
   const [isMobile, setIsMobile] = React.useState(false);
+
+  // Get navigation config based on user role
+  const getNavigationConfig = () => {
+    if (!meData?.role) return [];
+    
+    switch (meData.role) {
+      case USER_ROLES.CLIENT:
+        return clientNavConfig;
+      case USER_ROLES.ADMIN:
+      default:
+        return navConfig;
+    }
+  };
+
+  // Filter navigation items based on permissions
+  const filterNavItems = (items) => {
+    return items.filter(item => {
+      if (!item.permissions || item.permissions.length === 0) return true;
+      return item.permissions.some(permission => hasPermission(meData?.role, permission));
+    });
+  };
+
+  const navigationConfig = getNavigationConfig();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -116,218 +144,222 @@ function Sidebar({
 
         {/* Links */}
         <div className={`space-y-6 ${effectiveExpanded ? "" : "space-y-4"}`}>
-          {navConfig.map((group) => (
-            <div key={group.title}>
-              {/* Group title */}
-              <h3
-                className={`text-xs uppercase text-gray-500 font-semibold mb-3 transition-all duration-200 ${
-                  effectiveExpanded
-                    ? "pl-3 opacity-100"
-                    : "text-center opacity-60 px-0"
-                }`}
-              >
-                {effectiveExpanded ? (
-                  group.title
-                ) : (
-                  <span className="block w-full text-center">•••</span>
-                )}
-              </h3>
+          {navigationConfig.map((group) => {
+            const filteredItems = filterNavItems(group.items);
+            if (filteredItems.length === 0) return null;
+            
+            return (
+              <div key={group.title}>
+                {/* Group title */}
+                <h3
+                  className={`text-xs uppercase text-gray-500 font-semibold mb-3 transition-all duration-200 ${
+                    effectiveExpanded
+                      ? "pl-3 opacity-100"
+                      : "text-center opacity-60 px-0"
+                  }`}
+                >
+                  {effectiveExpanded ? (
+                    group.title
+                  ) : (
+                    <span className="block w-full text-center">•••</span>
+                  )}
+                </h3>
 
-              <ul
-                className={`${effectiveExpanded ? "space-y-1" : "space-y-2"}`}
-              >
-                {group.items.map((item) => {
-                  const isActive = isItemActive(item);
-                  const iconClass = isActive
-                    ? "text-secondary-500"
-                    : "text-gray-500";
+                <ul
+                  className={`${effectiveExpanded ? "space-y-1" : "space-y-2"}`}
+                >
+                  {filteredItems.map((item) => {
+                    const isActive = isItemActive(item);
+                    const iconClass = isActive
+                      ? "text-secondary-500"
+                      : "text-gray-500";
 
-                  if (item.children) {
-                    return (
-                      <SidebarLinkGroup
-                        key={item.name}
-                        activecondition={isActive}
-                        sidebarExpanded={effectiveExpanded}
-                        itemName={item.name}
-                      >
-                        {(handleClick, open) => (
-                          <div className="group relative">
-                            <a
-                              href="#0"
-                              className={`block text-gray-800 truncate transition-all duration-150 ${
-                                isActive
-                                  ? "hover:text-gray-800"
-                                  : "hover:text-gray-900"
-                              } ${
-                                effectiveExpanded
-                                  ? ""
-                                  : "flex items-center justify-center"
-                              }`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (!effectiveExpanded && !isMobile) {
-                                  setSidebarExpanded(true);
-                                }
-                                handleClick();
-                              }}
-                            >
-                              <div
-                                className={`flex items-center ${
+                    if (item.children) {
+                      return (
+                        <SidebarLinkGroup
+                          key={item.name}
+                          activecondition={isActive}
+                          sidebarExpanded={effectiveExpanded}
+                          itemName={item.name}
+                        >
+                          {(handleClick, open) => (
+                            <div className="group relative">
+                              <a
+                                href="#0"
+                                className={`block text-gray-800 truncate transition-all duration-150 ${
+                                  isActive
+                                    ? "hover:text-gray-800"
+                                    : "hover:text-gray-900"
+                                } ${
                                   effectiveExpanded
-                                    ? "justify-between"
-                                    : "justify-center"
+                                    ? ""
+                                    : "flex items-center justify-center"
                                 }`}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (!effectiveExpanded && !isMobile) {
+                                    setSidebarExpanded(true);
+                                  }
+                                  handleClick();
+                                }}
                               >
                                 <div
                                   className={`flex items-center ${
                                     effectiveExpanded
-                                      ? ""
-                                      : "justify-center w-full"
+                                      ? "justify-between"
+                                      : "justify-center"
                                   }`}
                                 >
-                                  <item.icon
-                                    className={`shrink-0 h-6 w-6 ${iconClass} transition-colors duration-200`}
-                                  />
+                                  <div
+                                    className={`flex items-center ${
+                                      effectiveExpanded
+                                        ? ""
+                                        : "justify-center w-full"
+                                    }`}
+                                  >
+                                    <item.icon
+                                      className={`shrink-0 h-6 w-6 ${iconClass} transition-colors duration-200`}
+                                    />
 
+                                    {effectiveExpanded && (
+                                      <span className="text-sm font-medium ml-3 transition-opacity duration-200">
+                                        {item.name}
+                                      </span>
+                                    )}
+                                  </div>
                                   {effectiveExpanded && (
-                                    <span className="text-sm font-medium ml-3 transition-opacity duration-200">
-                                      {item.name}
-                                    </span>
+                                    <div className="flex shrink-0 ml-2">
+                                      <svg
+                                        className={`w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 transition-transform duration-200 ${
+                                          open && "rotate-180"
+                                        }`}
+                                        viewBox="0 0 12 12"
+                                      >
+                                        <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
+                                      </svg>
+                                    </div>
                                   )}
                                 </div>
-                                {effectiveExpanded && (
-                                  <div className="flex shrink-0 ml-2">
-                                    <svg
-                                      className={`w-3 h-3 shrink-0 ml-1 fill-current text-gray-400 transition-transform duration-200 ${
-                                        open && "rotate-180"
-                                      }`}
-                                      viewBox="0 0 12 12"
-                                    >
-                                      <path d="M5.9 11.4L.5 6l1.4-1.4 4 4 4-4L11.3 6z" />
-                                    </svg>
-                                  </div>
-                                )}
-                              </div>
-                            </a>
+                              </a>
 
-                            {/* Tooltip for collapsed state */}
-                            {!effectiveExpanded && !isMobile && (
-                              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10 shadow-lg">
-                                {item.name}
-                                <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
-                              </div>
-                            )}
+                              {/* Tooltip for collapsed state */}
+                              {!effectiveExpanded && !isMobile && (
+                                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-60 shadow-lg">
+                                  {item.name}
+                                  <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
+                                </div>
+                              )}
 
-                            {/* Submenu */}
-                            {effectiveExpanded && (
-                              <ul
-                                className={`pl-9 mt-1 space-y-1 transition-all duration-200 ${
-                                  !open && "hidden"
-                                }`}
-                              >
-                                {item.children.map((child) => {
-                                  const isChildActive = pathname === child.path;
-                                  //  || pathname.startsWith(`${child.path}/`);
-                                  return (
-                                    <li key={child.name}>
-                                      <NavLink
-                                        end
-                                        to={child.path}
-                                        className={`block py-1 transition duration-150 truncate text-sm font-medium ${
-                                          isChildActive
-                                            ? "text-secondary-500"
-                                            : "text-gray-600 hover:text-gray-900"
-                                        }`}
-                                      >
-                                        {child.name}
-                                      </NavLink>
-                                    </li>
-                                  );
-                                })}
-                              </ul>
-                            )}
-                          </div>
-                        )}
-                      </SidebarLinkGroup>
-                    );
-                  } else {
-                    return (
-                      <li
-                        key={item.name}
-                        className={`mb-0.5 last:mb-0 transition-all duration-200 ${
-                          isActive ? "bg-secondary-50" : ""
-                        } ${
-                          effectiveExpanded
-                            ? "px-3 py-2 rounded-sm"
-                            : "px-2 py-2 rounded-lg mx-1 hover:bg-gray-100"
-                        }`}
-                      >
-                        <NavLink
-                          end
-                          to={item.path}
-                          className={`group relative block text-gray-800 truncate transition duration-150 ${
-                            isActive
-                              ? "text-secondary-500 hover:text-secondary-600"
-                              : "hover:text-gray-900"
+                              {/* Submenu */}
+                              {effectiveExpanded && (
+                                <ul
+                                  className={`pl-9 mt-1 space-y-1 transition-all duration-200 ${
+                                    !open && "hidden"
+                                  }`}
+                                >
+                                  {item.children.map((child) => {
+                                    const isChildActive = pathname === child.path;
+                                    return (
+                                      <li key={child.name}>
+                                        <NavLink
+                                          end
+                                          to={child.path}
+                                          className={`block py-1 transition duration-150 truncate text-sm font-medium ${
+                                            isChildActive
+                                              ? "text-secondary-500"
+                                              : "text-gray-600 hover:text-gray-900"
+                                          }`}
+                                        >
+                                          {child.name}
+                                        </NavLink>
+                                      </li>
+                                    );
+                                  })}
+                                </ul>
+                              )}
+                            </div>
+                          )}
+                        </SidebarLinkGroup>
+                      );
+                    } else {
+                      return (
+                        <li
+                          key={item.name}
+                          className={`mb-0.5 last:mb-0 transition-all duration-200 ${
+                            isActive ? "bg-secondary-50" : ""
                           } ${
                             effectiveExpanded
-                              ? ""
-                              : "flex items-center justify-center"
+                              ? "px-3 py-2 rounded-sm"
+                              : "px-2 py-2 rounded-lg mx-1 hover:bg-gray-100"
                           }`}
                         >
-                          <div
-                            className={`flex items-center ${
+                          <NavLink
+                            end
+                            to={item.path}
+                            className={`group relative block text-gray-800 truncate transition duration-150 ${
+                              isActive
+                                ? "text-secondary-500 hover:text-secondary-600"
+                                : "hover:text-gray-900"
+                            } ${
                               effectiveExpanded
-                                ? "justify-between"
-                                : "justify-center"
+                                ? ""
+                                : "flex items-center justify-center"
                             }`}
                           >
                             <div
                               className={`flex items-center ${
                                 effectiveExpanded
-                                  ? "grow"
-                                  : "justify-center w-full"
+                                  ? "justify-between"
+                                  : "justify-center"
                               }`}
                             >
-                              <item.icon
-                                className={`shrink-0 h-6 w-6 ${iconClass} transition-colors duration-200`}
-                              />
+                              <div
+                                className={`flex items-center ${
+                                  effectiveExpanded
+                                    ? "grow"
+                                    : "justify-center w-full"
+                                }`}
+                              >
+                                <item.icon
+                                  className={`shrink-0 h-6 w-6 ${iconClass} transition-colors duration-200`}
+                                />
 
-                              {effectiveExpanded && (
-                                <span className="text-sm font-medium ml-3 transition-opacity duration-200">
-                                  {item.name}
-                                </span>
+                                {effectiveExpanded && (
+                                  <span className="text-sm font-medium ml-3 transition-opacity duration-200">
+                                    {item.name}
+                                  </span>
+                                )}
+                              </div>
+                              {effectiveExpanded && item.badge && (
+                                <div className="flex shrink-0 ml-2">
+                                  <span className="inline-flex items-center justify-center h-5 text-xs font-medium text-white bg-secondary-500 px-2 rounded transition-all duration-200">
+                                    {item.badge}
+                                  </span>
+                                </div>
                               )}
                             </div>
-                            {effectiveExpanded && item.badge && (
-                              <div className="flex flex-shrink-0 ml-2">
-                                <span className="inline-flex items-center justify-center h-5 text-xs font-medium text-white bg-secondary-500 px-2 rounded transition-all duration-200">
-                                  {item.badge}
-                                </span>
+
+                            {/* Tooltip for collapsed state */}
+                            {!effectiveExpanded && !isMobile && (
+                              <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-60 shadow-lg flex items-center">
+                                {item.name}
+                                {item.badge && (
+                                  <span className="inline-flex items-center justify-center h-4 text-xs font-medium text-white bg-primary px-1.5 rounded ml-2">
+                                    {item.badge}
+                                  </span>
+                                )}
+                                <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
                               </div>
                             )}
-                          </div>
-
-                          {/* Tooltip for collapsed state */}
-                          {!effectiveExpanded && !isMobile && (
-                            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-[60] shadow-lg flex items-center">
-                              {item.name}
-                              {item.badge && (
-                                <span className="inline-flex items-center justify-center h-4 text-xs font-medium text-white bg-primary px-1.5 rounded ml-2">
-                                  {item.badge}
-                                </span>
-                              )}
-                              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
-                            </div>
-                          )}
-                        </NavLink>
-                      </li>
-                    );
-                  }
-                })}
-              </ul>
-            </div>
-          ))}
+                          </NavLink>
+                        </li>
+                      );
+                    }
+                  })}
+                </ul>
+              </div>
+            );
+          })}
         </div>
 
         {/* Expand / collapse button - only show on desktop */}

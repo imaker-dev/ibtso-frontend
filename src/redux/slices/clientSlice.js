@@ -29,6 +29,11 @@ export const fetchClientById = createAsyncThunk(
   },
 );
 
+export const downloadClientBarcodeById = createAsyncThunk("/download/client/barcode/:id", async ({clientId,startDate,endDate}) => {
+  const res = await ClientServices.downloadClientAllBarcodeApi(clientId,startDate,endDate);
+  return res.data;
+});
+
 const clientSlice = createSlice({
   name: "client",
   initialState: {
@@ -38,6 +43,7 @@ const clientSlice = createSlice({
     allClientsData: null,
     isFetchingClientDetails: false,
     clientDetails: null,
+    clientBarcodeToDownloadId: null,
   },
   reducers: {
     clearClientDetails: (state) => {
@@ -88,6 +94,17 @@ const clientSlice = createSlice({
       })
       .addCase(fetchClientById.rejected, (state, action) => {
         state.isFetchingClientDetails = false;
+        toast.error(action.error.message);
+      })
+      .addCase(downloadClientBarcodeById.pending, (state, action) => {
+        state.clientBarcodeToDownloadId = action.meta.arg.clientId;
+      })
+      .addCase(downloadClientBarcodeById.fulfilled, (state, action) => {
+        state.clientBarcodeToDownloadId = null;
+        toast.success("Downloaded Successfully")
+      })
+      .addCase(downloadClientBarcodeById.rejected, (state, action) => {
+        state.clientBarcodeToDownloadId = null;
         toast.error(action.error.message);
       });
   },

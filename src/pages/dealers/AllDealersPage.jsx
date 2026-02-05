@@ -187,17 +187,7 @@ const AllDealersPage = () => {
       icon: Edit2,
       disabled: dealerBarcodeToDownloadId,
       color: "blue",
-    },
-    {
-      label: "Download",
-      type: "success",
-      onClick: (dealer) => {
-        (setSelectedDealer(dealer), setShowDownloadOverlay(true));
-      },
-      icon: Download,
-      loading: (dealer) => dealerBarcodeToDownloadId === dealer._id,
-      color: "emerald",
-    },
+    }
   ];
 
   const actions = [
@@ -282,13 +272,13 @@ const AllDealersPage = () => {
         )}
       </div>
 
-      <DealerAssetDownloadModal
+      {/* <DealerAssetDownloadModal
         isOpen={showDownloadOverlay}
         onClose={resetDealerStates}
         onSubmit={handleDownloadBarcode}
         dealer={selectedDealer}
         loading={dealerBarcodeToDownloadId}
-      />
+      /> */}
     </>
   );
 };

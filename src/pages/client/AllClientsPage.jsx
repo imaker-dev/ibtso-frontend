@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PageHeader from "../../components/layout/PageHeader";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllClients } from "../../redux/slices/clientSlice";
@@ -6,6 +6,7 @@ import { formatDate } from "../../utils/dateFormatter";
 import {
   Calendar,
   CheckCircle,
+  Download,
   Edit2,
   Eye,
   Mail,
@@ -16,16 +17,45 @@ import {
 } from "lucide-react";
 import SmartTable from "../../components/layout/SmartTable";
 import { useNavigate } from "react-router-dom";
+import { handleResponse } from "../../utils/helpers/helpers";
+import { downloadBlob } from "../../utils/blob";
+import { downloadClientBarcodeById } from "../../redux/slices/clientSlice";
+import DealerAssetDownloadModal from "../dealers/DealerAssetDownloadModal";
 
 const AllClientsPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { allClientsData, loading } = useSelector((state) => state.client);
+  const { allClientsData, loading, clientBarcodeToDownloadId } = useSelector(
+    (state) => state.client,
+  );
+
+  const [showDownloadOverlay, setShowDownloadOverlay] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
 
   const { clients, totalClients } = allClientsData || {};
   const fetchClients = () => {
     dispatch(fetchAllClients());
+  };
+
+  const resetClientStates = () => {
+    setShowDownloadOverlay(false);
+    setSelectedClient(null);
+  };
+
+  const handleDownloadBarcode = async ({
+    fileName,
+    dealerId,
+    startDate,
+    endDate,
+  }) => {
+    await handleResponse(
+      dispatch(downloadClientBarcodeById({ clientId: dealerId, startDate, endDate })),
+      (res) => {
+        downloadBlob({ data: res.payload, fileName });
+        resetClientStates();
+      },
+    );
   };
 
   useEffect(() => {
@@ -141,12 +171,25 @@ const AllClientsPage = () => {
       label: "View Client",
       onClick: (client) => navigate(`/clients/client?clientId=${client?._id}`),
       icon: Eye,
+      disabled: clientBarcodeToDownloadId,
     },
     {
       label: "Update Client",
       onClick: (client) => navigate(`/clients/add?clientId=${client?._id}`),
       icon: Edit2,
+      disabled: clientBarcodeToDownloadId,
       color: "blue",
+    },
+    {
+      label: "Download",
+      type: "success",
+      onClick: (client) => {
+        setSelectedClient(client);
+        setShowDownloadOverlay(true);
+      },
+      icon: Download,
+      loading: (client) => clientBarcodeToDownloadId === client._id,
+      color: "emerald",
     },
   ];
 
@@ -176,6 +219,13 @@ const AllClientsPage = () => {
         emptyMessage="No clients found"
         emptyDescription="There are no clients registered yet."
         loading={loading}
+      />
+      <DealerAssetDownloadModal
+        isOpen={showDownloadOverlay}
+        onClose={resetClientStates}
+        onSubmit={handleDownloadBarcode}
+        dealer={selectedClient}
+        loading={clientBarcodeToDownloadId}
       />
     </div>
   );

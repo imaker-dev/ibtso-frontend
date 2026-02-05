@@ -34,8 +34,12 @@ const AssetDetailsPage = () => {
   const { assetDetails, isFetchingDetails, assetToDownloadId } = useSelector(
     (state) => state.asset,
   );
+  const { meData } = useSelector((state) => state.auth);
 
   const { dealerId, clientId, creator } = assetDetails || {};
+  
+  // Check if user is a client
+  const isClient = meData?.role === "CLIENT";
 
   useEffect(() => {
     if (assetId) {
@@ -43,7 +47,7 @@ const AssetDetailsPage = () => {
     }
   }, [assetId]);
 
-  const actions = [
+  const actions = isClient ? [] : [
     {
       label: "Update Asset",
       type: "secondary",

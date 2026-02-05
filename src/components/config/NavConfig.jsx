@@ -1,4 +1,5 @@
 import { Gauge, Package, Users, Tag, Building2 } from "lucide-react";
+import { PERMISSIONS } from "../../constants/roles";
 
 export const navConfig = [
   {
@@ -8,6 +9,7 @@ export const navConfig = [
         name: "Overview",
         icon: Gauge,
         path: "/",
+        permissions: [PERMISSIONS.VIEW_DASHBOARD],
       },
     ],
   },
@@ -17,6 +19,7 @@ export const navConfig = [
       {
         name: "Clients",
         icon: Building2,
+        permissions: [PERMISSIONS.VIEW_ALL_CLIENTS],
         children: [
           { name: "All Clients", path: "/clients" },
           { name: "Add Client", path: "/clients/add" },
@@ -30,6 +33,7 @@ export const navConfig = [
       {
         name: "Dealers",
         icon: Users,
+        permissions: [PERMISSIONS.VIEW_ALL_DEALERS],
         children: [
           { name: "All Dealers", path: "/dealers" },
           { name: "Add Dealer", path: "/dealers/add" },
@@ -43,6 +47,7 @@ export const navConfig = [
       {
         name: "Assets",
         icon: Package,
+        permissions: [PERMISSIONS.VIEW_ALL_ASSETS],
         children: [
           {
             name: "All Assets",
@@ -59,6 +64,11 @@ export const navConfig = [
 
   {
     title: "Brands Management",
-    items: [{ name: "Brands", icon: Tag, path: "/brands" }],
+    items: [{ 
+      name: "Brands", 
+      icon: Tag, 
+      path: "/brands",
+      permissions: [PERMISSIONS.VIEW_BRANDS],
+    }],
   },
 ];
