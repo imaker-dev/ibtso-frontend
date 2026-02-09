@@ -10,6 +10,9 @@ import {
   FileText,
   Users,
   Loader,
+  Lock,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import MultiSelect from "../../components/MultiSelect";
 
@@ -27,6 +30,22 @@ const clientValidationSchema = Yup.object().shape({
   placeOfSupply: Yup.string().nullable(),
   country: Yup.string().nullable(),
   dealerIds: Yup.array().nullable(),
+  
+  // Password fields - only required when creating new client
+  password: Yup.string().when('$isEdit', {
+    is: false,
+    then: (schema) => schema
+      .min(6, "Password must be at least 6 characters")
+      .required("Password is required for new clients"),
+    otherwise: (schema) => schema.nullable(),
+  }),
+  confirmPassword: Yup.string().when('$isEdit', {
+    is: false,
+    then: (schema) => schema
+      .oneOf([Yup.ref('password'), null], 'Passwords must match')
+      .required("Please confirm password"),
+    otherwise: (schema) => schema.nullable(),
+  }),
 });
 
 /* -------------------- Error Text -------------------- */
@@ -39,6 +58,11 @@ const SimpleError = ({ name }) => (
 
 /* -------------------- Component -------------------- */
 const ClientForm = ({ onSubmit, loading = false, dealers = [], client }) => {
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  
+  const isEdit = !!client;
+  
   const initialValues = {
     name: client?.name || "",
     email: client?.email || "",
@@ -49,6 +73,8 @@ const ClientForm = ({ onSubmit, loading = false, dealers = [], client }) => {
     placeOfSupply: client?.placeOfSupply || "",
     country: client?.country || "",
     dealerIds: client?.dealerIds ? client.dealerIds.map((d) => d._id) : [],
+    password: "",
+    confirmPassword: "",
   };
 
   // Convert dealers to options for MultiSelect
@@ -68,6 +94,7 @@ const ClientForm = ({ onSubmit, loading = false, dealers = [], client }) => {
       initialValues={initialValues}
       enableReinitialize
       validationSchema={clientValidationSchema}
+      context={{ isEdit }}
       onSubmit={handleSubmit}
     >
       {({ values, setFieldValue }) => (
@@ -113,6 +140,81 @@ const ClientForm = ({ onSubmit, loading = false, dealers = [], client }) => {
               </div>
             </div>
           </section>
+
+          {/* -------- Login Credentials (Only for new clients) -------- */}
+          {!isEdit && (
+            <section className="bg-white rounded-xl">
+              <div className="text-xl font-bold p-5 border-b border-slate-200 flex items-center gap-2">
+                <Lock className="w-5 h-5 text-secondary-500" />
+                Login Credentials
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-6 p-5">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Password *
+                  </label>
+                  <div className="relative">
+                    <Field
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter password"
+                      className="w-full form-input py-3 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  <SimpleError name="password" />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Minimum 6 characters required
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Confirm Password *
+                  </label>
+                  <div className="relative">
+                    <Field
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm password"
+                      className="w-full form-input py-3 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  <SimpleError name="confirmPassword" />
+                </div>
+              </div>
+
+              <div className="px-5 pb-5">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-700">
+                    <strong>Note:</strong> The client will use this password to login to their account. Make sure to share these credentials securely with the client.
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* -------- Business Info -------- */}
           <section className="bg-white rounded-xl">
