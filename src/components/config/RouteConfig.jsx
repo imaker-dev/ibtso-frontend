@@ -10,6 +10,7 @@ import AllBrandsPage from "../../pages/brands/AllBrandsPage";
 import AllClientsPage from "../../pages/client/AllClientsPage";
 import AddClientPage from "../../pages/client/AddClientPage";
 import ClientDetailsPage from "../../pages/client/ClientDetailsPage";
+import BarcodeViewsReportPage from "../../pages/reports/BarcodeViewsReportPage";
 import UnauthorizedPage from "../../pages/UnauthorizedPage";
 import ProtectedRoute from "../ProtectedRoute";
 import { PERMISSIONS } from "../../constants/roles";
@@ -100,6 +101,14 @@ const routeConfig = [
     element: (
       <ProtectedRoute requiredPermissions={[PERMISSIONS.VIEW_BRANDS]}>
         <AllBrandsPage />
+      </ProtectedRoute>
+    )
+  },
+  { 
+    path: "/reports/barcode-views", 
+    element: (
+      <ProtectedRoute requiredPermissions={[PERMISSIONS.VIEW_BARCODE_REPORTS]}>
+        <BarcodeViewsReportPage />
       </ProtectedRoute>
     )
   },

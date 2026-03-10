@@ -55,7 +55,7 @@ axiosInstance.interceptors.response.use(
         data?.message || error.response.data.error || "Some unknown error";
 
       const logoutErrors = [
-        "Invalid or expired token",
+        "Your token has expired. Please log in again",
         "The user belonging to this token no longer exists",
         "Password recently changed. Please log in again",
       ];

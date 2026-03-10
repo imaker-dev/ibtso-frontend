@@ -1,4 +1,4 @@
-import { Gauge, Package, Users, Tag, Building2 } from "lucide-react";
+import { Gauge, Package, Users, Tag, Building2, BarChart3 } from "lucide-react";
 import { PERMISSIONS } from "../../constants/roles";
 
 export const navConfig = [
@@ -70,5 +70,16 @@ export const navConfig = [
       path: "/brands",
       permissions: [PERMISSIONS.VIEW_BRANDS],
     }],
+  },
+  {
+    title: "Reports",
+    items: [
+      {
+        name: "Barcode Views",
+        icon: BarChart3,
+        path: "/reports/barcode-views",
+        permissions: [PERMISSIONS.VIEW_BARCODE_REPORTS],
+      },
+    ],
   },
 ];

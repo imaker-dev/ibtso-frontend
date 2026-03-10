@@ -6,6 +6,7 @@ import dashboardSlice from '../src/redux/slices/dashboardSlice';
 import brandSlice from '../src/redux/slices/brandSlice';
 import clientSlice from '../src/redux/slices/clientSlice';
 import clientDashboardSlice from '../src/redux/slices/clientDashboardSlice';
+import barcodeReportSlice from '../src/redux/slices/barcodeReportSlice';
 
 const reducer = {
   auth: authSlice,
@@ -15,6 +16,7 @@ const reducer = {
   brand:brandSlice,
   client:clientSlice,
   clientDashboard:clientDashboardSlice,
+  barcodeReport:barcodeReportSlice,
 };
 
 const store = configureStore({

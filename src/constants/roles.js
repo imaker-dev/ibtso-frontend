@@ -38,6 +38,9 @@ export const PERMISSIONS = {
   // Download permissions
   DOWNLOAD_CLIENT_QR: 'download_client_qr',
   DOWNLOAD_DEALER_QR: 'download_dealer_qr',
+
+  // Reports permissions
+  VIEW_BARCODE_REPORTS: 'view_barcode_reports',
 };
 
 export const ROLE_PERMISSIONS = {
@@ -62,6 +65,7 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.DELETE_BRAND,
     PERMISSIONS.DOWNLOAD_CLIENT_QR,
     PERMISSIONS.DOWNLOAD_DEALER_QR,
+    PERMISSIONS.VIEW_BARCODE_REPORTS,
   ],
   
   [USER_ROLES.CLIENT]: [
